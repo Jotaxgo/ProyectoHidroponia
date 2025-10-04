@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ViveroController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,35 +16,45 @@ use App\Http\Controllers\Admin\UserController;
 |
 */
 
+// Ruta de bienvenida
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Ruta del dashboard principal de Breeze
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Rutas del perfil de usuario de Breeze
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Incluye las rutas de autenticación (login, register, etc.)
 require __DIR__.'/auth.php';
 
-// --- GRUPO DE RUTAS PARA EL ADMIN ---
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Aquí irán todas las rutas que requieren que el usuario esté logueado
 
-    // Ahora, un sub-grupo específico para el rol de Admin
-    Route::middleware(['role:Admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [UserController::class, 'create'])->name('users.create'); // <-- AÑADIR
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');       // <-- AÑADIR
-        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit'); // <-- AÑADIR
-        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update'); // <-- AÑADIR
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy'); // <-- AÑADIR
-        Route::resource('viveros', \App\Http\Controllers\Admin\ViveroController::class); // <-- AÑADE ESTA LÍNEA
+// --- GRUPO DE RUTAS PARA EL ADMIN ---
+Route::middleware(['auth', 'verified', 'role:Admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
         
-    });
+    // --- RECURSOS PRINCIPALES ---
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('viveros', ViveroController::class)->except(['show']);
+
+    // --- RUTAS PARA LA PAPELERA DE USUARIOS ---
+    Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
+    Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
+
+    // --- RUTAS PARA LA PAPELERA DE VIVEROS ---
+    Route::get('viveros/trash', [ViveroController::class, 'trash'])->name('viveros.trash');
+    Route::put('viveros/{id}/restore', [ViveroController::class, 'restore'])->name('viveros.restore');
+    Route::delete('viveros/{id}/force-delete', [ViveroController::class, 'forceDelete'])->name('viveros.forceDelete');
+            
 });

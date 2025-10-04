@@ -90,4 +90,35 @@ class ViveroController extends Controller
 
         return redirect()->route('admin.viveros.index')->with('success', 'Vivero eliminado exitosamente.');
     }
+
+    /**
+     * Muestra una lista de los viveros eliminados lógicamente.
+     */
+    public function trash()
+    {
+        $trashedViveros = Vivero::onlyTrashed()->get();
+        return view('admin.viveros.trash', compact('trashedViveros'));
+    }
+
+    /**
+     * Restaura un vivero eliminado lógicamente.
+     */
+    public function restore($id)
+    {
+        $vivero = Vivero::withTrashed()->findOrFail($id);
+        $vivero->restore();
+
+        return redirect()->route('admin.viveros.trash')->with('success', 'Vivero restaurado exitosamente.');
+    }
+
+    /**
+     * Elimina permanentemente un vivero de la base de datos.
+     */
+    public function forceDelete($id)
+    {
+        $vivero = Vivero::withTrashed()->findOrFail($id);
+        $vivero->forceDelete();
+
+        return redirect()->route('admin.viveros.trash')->with('success', 'Vivero eliminado permanentemente.');
+    }
 }

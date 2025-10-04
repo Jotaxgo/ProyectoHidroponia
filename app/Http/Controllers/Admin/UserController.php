@@ -100,4 +100,35 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado exitosamente.');
     }
+
+    /**
+     * Muestra una lista de los usuarios eliminados lógicamente.
+     */
+    public function trash()
+    {
+        $trashedUsers = User::onlyTrashed()->get(); // <-- Obtiene SÓLO los eliminados
+        return view('admin.users.trash', compact('trashedUsers'));
+    }
+
+    /**
+     * Restaura un usuario eliminado lógicamente.
+     */
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id); // <-- Busca incluyendo eliminados
+        $user->restore();
+
+        return redirect()->route('admin.users.trash')->with('success', 'Usuario restaurado exitosamente.');
+    }
+
+    /**
+     * Elimina permanentemente un usuario de la base de datos.
+     */
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->forceDelete(); // <-- Esto es un borrado físico y permanente
+
+        return redirect()->route('admin.users.trash')->with('success', 'Usuario eliminado permanentemente.');
+    }
 }
