@@ -16,6 +16,17 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+                @if(Auth::user()->role->nombre_rol == 'Admin')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            {{ __('Gestión de Usuarios') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('admin.viveros.index')" :active="request()->routeIs('admin.viveros.*')">
+                            {{ __('Gestión de Viveros') }}
+                        </x-nav-link>
+                    </div>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->
@@ -70,6 +81,14 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->role->nombre_rol == 'Admin')
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('Gestión de Usuarios') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.viveros.index')" :active="request()->routeIs('admin.viveros.*')">
+                    {{ __('Gestión de Viveros') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

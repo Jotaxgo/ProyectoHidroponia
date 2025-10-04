@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit'); // <-- AÑADIR
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update'); // <-- AÑADIR
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy'); // <-- AÑADIR
+        Route::resource('viveros', \App\Http\Controllers\Admin\ViveroController::class); // <-- AÑADE ESTA LÍNEA
         
     });
 });

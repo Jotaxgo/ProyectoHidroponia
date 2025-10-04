@@ -17,6 +17,7 @@ return new class extends Migration
         $table->string('ubicacion');
         $table->text('descripcion')->nullable(); // 'nullable()' hace que este campo sea opcional
         $table->timestamps();
+        $table->softDeletes();
         });
     }
 
