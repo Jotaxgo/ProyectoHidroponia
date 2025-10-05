@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Role; // <-- Importa el modelo Role
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Password; // <-- AÑADE ESTO
+use App\Notifications\SendUserInvitation;  // <-- AÑADE ESTO
+
 
 class UserController extends Controller
 {
@@ -17,7 +20,7 @@ class UserController extends Controller
     public function index()
     {
         // 1. Obtenemos todos los usuarios de la base de datos
-        $users = User::all();
+        $users = User::with('role')->get();
 
         // 2. Devolvemos una vista y le pasamos la variable 'users'
         // Crearemos esta vista en el siguiente paso
@@ -34,29 +37,35 @@ class UserController extends Controller
         return view('admin.users.create', compact('roles'));
     }
 
-    /**
-     * Guarda un nuevo usuario en la base de datos.
-     */
     public function store(Request $request)
     {
-        // Validación del formulario
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        // Creación del usuario
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => null,
             'role_id' => $request->role_id,
         ]);
 
-        // Redirigir de vuelta a la lista de usuarios con un mensaje de éxito
-        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente.');
+        // --- LÓGICA PARA ENVIAR CORREO ---
+        // 1. Generamos un token para el reseteo de contraseña.
+        /** @var \Illuminate\Contracts\Auth\PasswordBroker $passwordBroker */
+        $passwordBroker = Password::broker();
+        $token = $passwordBroker->createToken($user);
+
+        // AÑADE ESTA LÍNEA DE PRUEBA AQUÍ
+        // dd('PRUEBA: A punto de enviar correo');
+
+        // 2. Enviamos la notificación al usuario con el token.
+        $user->notify(new SendUserInvitation($token));
+        // --- FIN DE LA LÓGICA ---
+
+        return redirect()->route('admin.users.index')->with('success', 'Usuario creado. Se ha enviado una invitación por correo.');
     }
 
     /**

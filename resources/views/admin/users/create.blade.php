@@ -42,19 +42,9 @@
                             </select>
                         </div>
 
-                        <div class="mt-4">
-                            <x-input-label for="password" :value="__('Contraseña')" />
-                            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required />
-                        </div>
-
-                        <div class="mt-4">
-                            <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
-                            <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required />
-                        </div>
-
                         <div class="flex items-center justify-end mt-4">
                             <x-primary-button>
-                                {{ __('Crear Usuario') }}
+                                {{ __('Crear Usuario y Enviar Invitación') }}
                             </x-primary-button>
                         </div>
                     </form>

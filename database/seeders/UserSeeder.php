@@ -27,16 +27,16 @@ class UserSeeder extends Seeder
         }
 
         // Crear Usuario Dueño de Vivero y asignarle el vivero de prueba
-        if ($ownerRole && $testVivero) {
-            $ownerUser = User::create([
-                'name' => 'Juan Dueño',
-                'email' => 'dueño@hidroponia.com',
-                'password' => Hash::make('password'),
-                'role_id' => $ownerRole->id,
-            ]);
+        // if ($ownerRole && $testVivero) {
+        //     $ownerUser = User::create([
+        //         'name' => 'Juan Dueño',
+        //         'email' => 'dueño@hidroponia.com',
+        //         'password' => Hash::make('password'),
+        //         'role_id' => $ownerRole->id,
+        //     ]);
 
-            // Usamos la tabla pivote para asignar el vivero a este usuario
-            $ownerUser->viveros()->attach($testVivero->id);
-        }
+        //     // Usamos la tabla pivote para asignar el vivero a este usuario
+        //     $ownerUser->viveros()->attach($testVivero->id);
+        // }
     }
 }
