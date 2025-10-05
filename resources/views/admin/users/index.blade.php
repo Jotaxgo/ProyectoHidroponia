@@ -28,6 +28,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Viveros Asignados</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th> </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200">
@@ -37,18 +38,23 @@
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $user->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $user->email }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $user->role->nombre_rol }}</td>
+                                <td>{{ $user->viveros->pluck('nombre')->join(', ') }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    @if($user->role->nombre_rol == 'Dueño de Vivero')
+                                        <a href="{{ route('admin.users.showViveros', $user) }}" class="text-green-600 hover:text-green-900 mr-4">Ver Viveros</a>
+                                    @endif
                                     <a href="{{ route('admin.users.edit', $user) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                    
+
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type-="submit" class="text-red-600 hover:text-red-900 ml-4"
-                                                onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
+                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-4"
+                                                onclick="return confirm('¿Estás seguro?')">
                                             Eliminar
                                         </button>
                                     </form>
                                 </td>
+                               
                             </tr>
                             @endforeach
                         </tbody>

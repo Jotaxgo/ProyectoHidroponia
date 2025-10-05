@@ -19,11 +19,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        // 1. Obtenemos todos los usuarios de la base de datos
-        $users = User::with('role')->get();
-
-        // 2. Devolvemos una vista y le pasamos la variable 'users'
-        // Crearemos esta vista en el siguiente paso
+        $users = User::with('role', 'viveros')->get(); // Añadimos 'viveros'
         return view('admin.users.index', compact('users'));
     }
 
@@ -45,6 +41,16 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        $role = Role::find($request->role_id);
+
+        // Validación condicional para el vivero
+        if ($role && $role->nombre_rol == 'Dueño de Vivero') {
+            $request->validate([
+                'vivero_nombre' => 'required|string|max:255|unique:viveros,nombre',
+                'vivero_ubicacion' => 'required|string|max:255',
+            ]);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -52,18 +58,22 @@ class UserController extends Controller
             'role_id' => $request->role_id,
         ]);
 
-        // --- LÓGICA PARA ENVIAR CORREO ---
-        // 1. Generamos un token para el reseteo de contraseña.
-        /** @var \Illuminate\Contracts\Auth\PasswordBroker $passwordBroker */
-        $passwordBroker = Password::broker();
-        $token = $passwordBroker->createToken($user);
+        // Si es Dueño, creamos el vivero y lo asociamos
+        if ($role && $role->nombre_rol == 'Dueño de Vivero') {
+            $user->viveros()->create([
+                'nombre' => $request->vivero_nombre,
+                'ubicacion' => $request->vivero_ubicacion,
+                'descripcion' => $request->vivero_descripcion,
+            ]);
+        }
 
-        // AÑADE ESTA LÍNEA DE PRUEBA AQUÍ
-        // dd('PRUEBA: A punto de enviar correo');
+        // --- INICIO: LÓGICA DE INVITACIÓN (ESTO ES LO QUE FALTABA) ---
+        // 1. Generamos un token para el reseteo de contraseña.
+        $token = Password::broker()->createToken($user);
 
         // 2. Enviamos la notificación al usuario con el token.
         $user->notify(new SendUserInvitation($token));
-        // --- FIN DE LA LÓGICA ---
+        // --- FIN: LÓGICA DE INVITACIÓN ---
 
         return redirect()->route('admin.users.index')->with('success', 'Usuario creado. Se ha enviado una invitación por correo.');
     }
@@ -136,8 +146,31 @@ class UserController extends Controller
     public function forceDelete($id)
     {
         $user = User::withTrashed()->findOrFail($id);
-        $user->forceDelete(); // <-- Esto es un borrado físico y permanente
+
+        // Contamos cuántos viveros le pertenecen a este usuario.
+        if ($user->viveros()->count() > 0) {
+            // Obtenemos los nombres de los viveros
+            $viveroNames = $user->viveros->pluck('nombre')->join(', ');
+
+            // Creamos un mensaje de error más específico
+            $errorMessage = "Este usuario no puede ser eliminado porque es dueño del/los vivero(s): {$viveroNames}. Por favor, reasigna estos viveros a otro dueño primero.";
+
+            return redirect()->route('admin.users.trash')->with('error', $errorMessage);
+        }
+
+        $user->forceDelete();
 
         return redirect()->route('admin.users.trash')->with('success', 'Usuario eliminado permanentemente.');
+    }
+
+    /**
+     * Muestra una lista de los viveros que le pertenecen a un usuario específico.
+     */
+    public function showViveros(User $user)
+    {
+        // Usamos la relación 'viveros' que ya definimos en el modelo User
+        $viveros = $user->viveros;
+
+        return view('admin.users.viveros', compact('user', 'viveros'));
     }
 }

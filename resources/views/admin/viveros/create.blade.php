@@ -30,6 +30,17 @@
                         </div>
 
                         <div class="mt-4">
+                            <x-input-label for="user_id" :value="__('Asignar Dueño')" />
+                            <select name="user_id" id="user_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                @forelse ($dueños as $dueño)
+                                    <option value="{{ $dueño->id }}">{{ $dueño->name }}</option>
+                                @empty
+                                    <option value="" disabled>No hay "Dueños de Vivero" disponibles</option>
+                                @endforelse
+                            </select>
+                        </div>
+
+                        <div class="mt-4">
                             <x-input-label for="ubicacion" :value="__('Ubicación')" />
                             <x-text-input id="ubicacion" class="block mt-1 w-full" type="text" name="ubicacion" :value="old('ubicacion')" required />
                         </div>

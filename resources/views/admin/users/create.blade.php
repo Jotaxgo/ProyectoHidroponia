@@ -8,17 +8,10 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+                <div class="p-6 text-gray-900 dark:text-gray-100" x-data="{ role_id: '{{ old('role_id', $roles->first()->id) }}' }">
 
                     @if ($errors->any())
-                        <div class="bg-red-500 text-white p-4 rounded mb-4">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                        @endif
 
                     <form method="POST" action="{{ route('admin.users.store') }}">
                         @csrf
@@ -32,14 +25,30 @@
                             <x-input-label for="email" :value="__('Email')" />
                             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required />
                         </div>
-                        
+
                         <div class="mt-4">
                             <x-input-label for="role_id" :value="__('Rol')" />
-                            <select name="role_id" id="role_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select name="role_id" id="role_id" x-model="role_id" class="block mt-1 w-full border-gray-300 ...">
                                 @foreach ($roles as $role)
                                     <option value="{{ $role->id }}">{{ $role->nombre_rol }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div x-show="role_id == '{{ $roles->where('nombre_rol', 'Dueño de Vivero')->first()->id }}'" x-transition class="mt-6 pt-6 border-t border-gray-300">
+                            <h3 class="text-lg font-medium">Información del Vivero Principal</h3>
+                            <div class="mt-4">
+                                <x-input-label for="vivero_nombre" value="Nombre del Vivero" />
+                                <x-text-input id="vivero_nombre" class="block mt-1 w-full" type="text" name="vivero_nombre" :value="old('vivero_nombre')" />
+                            </div>
+                            <div class="mt-4">
+                                <x-input-label for="vivero_ubicacion" value="Ubicación" />
+                                <x-text-input id="vivero_ubicacion" class="block mt-1 w-full" type="text" name="vivero_ubicacion" :value="old('vivero_ubicacion')" />
+                            </div>
+                            <div class="mt-4">
+                                <x-input-label for="vivero_descripcion" value="Descripción (opcional)" />
+                                <textarea name="vivero_descripcion" class="block mt-1 w-full border-gray-300 ...">{{ old('vivero_descripcion') }}</textarea>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

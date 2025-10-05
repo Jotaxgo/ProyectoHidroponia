@@ -6,24 +6,45 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vivero;
 use Illuminate\Validation\Rule; // <-- Importante para la validación
+use App\Models\User;
+use App\Models\Role;
 
 class ViveroController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $viveros = Vivero::all();
-        return view('admin.viveros.index', compact('viveros'));
-    }
+        // Obtenemos la lista de todos los posibles dueños
+        $ownerRole = Role::where('nombre_rol', 'Dueño de Vivero')->first();
+        $dueños = User::where('role_id', $ownerRole->id)->get();
+
+        // Empezamos la consulta de viveros
+        $viverosQuery = Vivero::with('user');
+
+        // Aplicamos el filtro si se envió uno
+        if ($request->filled('dueño_id')) {
+            $viverosQuery->where('user_id', $request->dueño_id);
+        }
+
+        $viveros = $viverosQuery->get();
+
+        return view('admin.viveros.index', compact('viveros', 'dueños'));
+    }   
 
     /**
      * Muestra el formulario para crear un nuevo vivero.
      */
     public function create()
     {
-        return view('admin.viveros.create');
+        // Buscamos el ID del rol "Dueño de Vivero"
+        $ownerRoleId = Role::where('nombre_rol', 'Dueño de Vivero')->first()->id;
+
+        // Obtenemos todos los usuarios que tienen ese rol
+        $dueños = User::where('role_id', $ownerRoleId)->get();
+
+        return view('admin.viveros.create', compact('dueños'));
     }
 
     /**
@@ -31,22 +52,16 @@ class ViveroController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validación de los datos del formulario
         $request->validate([
             'nombre' => 'required|string|max:255|unique:viveros',
+            'user_id' => 'required|exists:users,id', // <-- VALIDACIÓN DEL DUEÑO
             'ubicacion' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
         ]);
 
-        // 2. Creación del vivero
-        Vivero::create([
-            'nombre' => $request->nombre,
-            'ubicacion' => $request->ubicacion,
-            'descripcion' => $request->descripcion,
-        ]);
+        Vivero::create($request->all());
 
-        // 3. Redirección con mensaje de éxito
-        return redirect()->route('admin.viveros.index')->with('success', 'Vivero creado exitosamente.');
+        return redirect()->route('admin.viveros.index')->with('success', 'Vivero creado y asignado exitosamente.');
     }
 
     /**
@@ -62,7 +77,13 @@ class ViveroController extends Controller
      */
     public function edit(Vivero $vivero)
     {
-        return view('admin.viveros.edit', compact('vivero'));
+        // Buscamos el ID del rol "Dueño de Vivero"
+        $ownerRoleId = Role::where('nombre_rol', 'Dueño de Vivero')->first()->id;
+
+        // Obtenemos todos los usuarios que tienen ese rol
+        $dueños = User::where('role_id', $ownerRoleId)->get();
+
+        return view('admin.viveros.edit', compact('vivero', 'dueños'));
     }
 
      /**
@@ -72,6 +93,7 @@ class ViveroController extends Controller
     {
         $request->validate([
             'nombre' => ['required', 'string', 'max:255', Rule::unique('viveros')->ignore($vivero->id)],
+            'user_id' => 'required|exists:users,id', // <-- VALIDACIÓN DEL DUEÑO
             'ubicacion' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
         ]);

@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('viveros', function (Blueprint $table) {
-        $table->id();
-        $table->string('nombre');
-        $table->string('ubicacion');
-        $table->text('descripcion')->nullable(); // 'nullable()' hace que este campo sea opcional
-        $table->timestamps();
-        $table->softDeletes();
+            $table->id();
+            $table->foreignId('user_id')->constrained('users'); // <-- DUEÑO DEL VIVERO
+            $table->string('nombre');
+            $table->string('ubicacion');
+            $table->text('descripcion')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified', 'role:Admin'])
     // --- RECURSOS PRINCIPALES ---
     Route::resource('users', UserController::class)->except(['show']);
     // Route::resource('viveros', ViveroController::class)->except(['show']);
-    // Y AÑADE ESTE BLOQUE EN SU LUGAR:
+    Route::get('users/{user}/viveros', [UserController::class, 'showViveros'])->name('users.showViveros'); 
     Route::resource('viveros', ViveroController::class)->except(['show']);
     Route::resource('viveros.modulos', \App\Http\Controllers\Admin\ModuloController::class)->except(['show']);
 

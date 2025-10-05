@@ -60,8 +60,8 @@ class User extends Authenticatable
      * Los viveros que pertenecen al usuario.
      * The nurseries that belong to the user.
      */
-    public function viveros(): BelongsToMany
+    public function viveros() 
     {
-        return $this->belongsToMany(Vivero::class, 'user_vivero');
+        return $this->hasMany(Vivero::class);
     }
 }

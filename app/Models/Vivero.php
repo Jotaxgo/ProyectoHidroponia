@@ -15,6 +15,7 @@ class Vivero extends Model
         'nombre',
         'ubicacion',
         'descripcion',
+        'user_id',
     ];
 
     /**
@@ -23,5 +24,10 @@ class Vivero extends Model
     public function modulos(): HasMany // <-- AÑADE TODA ESTA FUNCIÓN
     {
         return $this->hasMany(Modulo::class);
+    }
+
+    public function user() 
+    {
+        return $this->belongsTo(User::class);
     }
 }
