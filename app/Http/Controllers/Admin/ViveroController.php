@@ -21,7 +21,7 @@ class ViveroController extends Controller
         $dueños = User::where('role_id', $ownerRole->id)->get();
 
         // Empezamos la consulta de viveros
-        $viverosQuery = Vivero::with('user');
+        $viverosQuery = Vivero::with('user')->withCount('modulos');
 
         // Aplicamos el filtro si se envió uno
         if ($request->filled('dueño_id')) {

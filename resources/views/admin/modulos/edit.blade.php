@@ -1,4 +1,6 @@
+
 <x-app-layout>
+    
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Editar Módulo en: <span class="text-indigo-500">{{ $vivero->nombre }}</span>
@@ -36,6 +38,35 @@
                                 <option value="Ocupado" {{ old('estado', $modulo->estado) == 'Ocupado' ? 'selected' : '' }}>Ocupado</option>
                                 <option value="Mantenimiento" {{ old('estado', $modulo->estado) == 'Mantenimiento' ? 'selected' : '' }}>Mantenimiento</option>
                             </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <x-input-label for="device_id" value="ID del Dispositivo (Hardware)" />
+                            <x-text-input id="device_id" class="block mt-1 w-full" type="text" name="device_id" :value="old('device_id', $modulo->hardware_info['device_id'] ?? '')" placeholder="Ej: MOD-A01-HW-12345" />
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                                Límites para Alertas
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label for="ph_min" value="pH Mínimo" />
+                                    <x-text-input id="ph_min" class="block mt-1 w-full" type="number" step="0.1" name="ph_min" :value="old('ph_min', $modulo->hardware_info['ph_min'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="ph_max" value="pH Máximo" />
+                                    <x-text-input id="ph_max" class="block mt-1 w-full" type="number" step="0.1" name="ph_max" :value="old('ph_max', $modulo->hardware_info['ph_max'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="temp_min" value="Temp. Mínima (°C)" />
+                                    <x-text-input id="temp_min" class="block mt-1 w-full" type="number" step="0.1" name="temp_min" :value="old('temp_min', $modulo->hardware_info['temp_min'] ?? '')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="temp_max" value="Temp. Máxima (°C)" />
+                                    <x-text-input id="temp_max" class="block mt-1 w-full" type="number" step="0.1" name="temp_max" :value="old('temp_max', $modulo->hardware_info['temp_max'] ?? '')" />
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

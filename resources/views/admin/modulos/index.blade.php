@@ -29,8 +29,8 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo Sistema</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device ID</th> 
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                             </tr>
                         </thead>
@@ -38,8 +38,8 @@
                             @forelse ($modulos as $modulo)
                             <tr>
                                 <td class="px-6 py-4">{{ $modulo->codigo_identificador }}</td>
-                                <td class="px-6 py-4">{{ $modulo->tipo_sistema }}</td>
                                 <td class="px-6 py-4">{{ $modulo->estado }}</td>
+                                <td class="px-6 py-4">{{ $modulo->hardware_info['device_id'] ?? 'N/A' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
 

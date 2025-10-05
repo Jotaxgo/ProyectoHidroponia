@@ -38,17 +38,31 @@ class ModuloController extends Controller
             'codigo_identificador' => 'required|string|max:255|unique:modulos',
             'tipo_sistema' => 'required|string|max:255',
             'capacidad' => 'required|integer|min:1',
+            'device_id' => 'nullable|string|max:255',
+            'ph_min' => 'nullable|numeric',
+            'ph_max' => 'nullable|numeric|gte:ph_min',
+            'temp_min' => 'nullable|numeric',
+            'temp_max' => 'nullable|numeric|gte:temp_min',
         ]);
+
+        // Preparamos el array para la columna JSON
+        $hardwareInfo = [
+            'device_id' => $request->device_id,
+            'ph_min' => $request->ph_min,
+            'ph_max' => $request->ph_max,
+            'temp_min' => $request->temp_min,
+            'temp_max' => $request->temp_max,
+        ];
 
         $vivero->modulos()->create([
             'codigo_identificador' => $request->codigo_identificador,
             'tipo_sistema' => $request->tipo_sistema,
             'capacidad' => $request->capacidad,
-            // El estado por defecto es 'Disponible', así que no necesitamos pasarlo
+            'hardware_info' => $hardwareInfo, // Guardamos el array completo
         ]);
 
         return redirect()->route('admin.viveros.modulos.index', $vivero)
-                         ->with('success', 'Módulo creado exitosamente.');
+                        ->with('success', 'Módulo creado exitosamente.');
     }
 
 
@@ -77,13 +91,35 @@ class ModuloController extends Controller
             'codigo_identificador' => ['required', 'string', 'max:255', Rule::unique('modulos')->ignore($modulo->id)],
             'tipo_sistema' => 'required|string|max:255',
             'capacidad' => 'required|integer|min:1',
-            'estado' => 'required|string', // Añadimos el estado
+            'estado' => 'required|string',
+            'device_id' => 'nullable|string|max:255',
+            // --- NUEVAS VALIDACIONES ---
+            'ph_min' => 'nullable|numeric',
+            'ph_max' => 'nullable|numeric|gte:ph_min', // gte: greater than or equal
+            'temp_min' => 'nullable|numeric',
+            'temp_max' => 'nullable|numeric|gte:temp_min',
         ]);
 
-        $modulo->update($request->all());
+        // Obtenemos la info de hardware existente o creamos un array vacío
+        $hardwareInfo = $modulo->hardware_info ?? [];
+
+        // Actualizamos los valores con los nuevos datos del formulario
+        $hardwareInfo['device_id'] = $request->device_id;
+        $hardwareInfo['ph_min'] = $request->ph_min;
+        $hardwareInfo['ph_max'] = $request->ph_max;
+        $hardwareInfo['temp_min'] = $request->temp_min;
+        $hardwareInfo['temp_max'] = $request->temp_max;
+
+        $modulo->update([
+            'codigo_identificador' => $request->codigo_identificador,
+            'tipo_sistema' => $request->tipo_sistema,
+            'capacidad' => $request->capacidad,
+            'estado' => $request->estado,
+            'hardware_info' => $hardwareInfo, // Guardamos el array completo
+        ]);
 
         return redirect()->route('admin.viveros.modulos.index', $vivero)
-                         ->with('success', 'Módulo actualizado exitosamente.');
+                        ->with('success', 'Módulo actualizado exitosamente.');
     }
 
     /**
