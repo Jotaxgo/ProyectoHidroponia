@@ -57,6 +57,9 @@ Route::middleware(['auth', 'verified', 'role:Admin'])
     Route::resource('viveros', ViveroController::class)->except(['show']);
     Route::resource('viveros.modulos', \App\Http\Controllers\Admin\ModuloController::class)->except(['show']);
 
+    // RUTA PARA LA VISTA GENERAL DE MÓDULOS (AÑADIR)
+    Route::get('modulos', [\App\Http\Controllers\Admin\ModuloController::class, 'indexAll'])->name('modulos.indexAll');
+
     // --- RUTAS PARA LA PAPELERA DE USUARIOS ---
     Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
     Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');

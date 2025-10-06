@@ -1,3 +1,4 @@
+
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,6 +25,10 @@
 
                         <x-nav-link :href="route('admin.viveros.index')" :active="request()->routeIs('admin.viveros.*')">
                             {{ __('Gestión de Viveros') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('admin.modulos.indexAll')" :active="request()->routeIs('admin.modulos.indexAll')">
+                            {{ __('Inventario de Módulos') }}
                         </x-nav-link>
                     </div>
                 @endif
@@ -87,6 +92,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.viveros.index')" :active="request()->routeIs('admin.viveros.*')">
                     {{ __('Gestión de Viveros') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.modulos.indexAll')" :active="request()->routeIs('admin.modulos.indexAll')">
+                    {{ __('Inventario de Módulos') }}
                 </x-responsive-nav-link>
             @endif
         </div>

@@ -36,7 +36,6 @@ class ModuloController extends Controller
     {
         $request->validate([
             'codigo_identificador' => 'required|string|max:255|unique:modulos',
-            'tipo_sistema' => 'required|string|max:255',
             'capacidad' => 'required|integer|min:1',
             'device_id' => 'nullable|string|max:255',
             'ph_min' => 'nullable|numeric',
@@ -162,5 +161,30 @@ class ModuloController extends Controller
         $modulo->forceDelete();
 
         return redirect()->route('admin.viveros.modulos.trash', $vivero)->with('success', 'Módulo eliminado permanentemente.');
+    }
+
+    /**
+     * Muestra una lista de TODOS los módulos del sistema, con filtros.
+     */
+    public function indexAll(Request $request)
+    {
+        // 1. Obtenemos los datos para los filtros
+        $viveros = Vivero::all();
+
+        // 2. Empezamos la consulta
+        $modulosQuery = Modulo::with('vivero');
+
+        // 3. Aplicamos los filtros si existen
+        if ($request->filled('estado')) {
+            $modulosQuery->where('estado', $request->estado);
+        }
+        if ($request->filled('vivero_id')) {
+            $modulosQuery->where('vivero_id', $request->vivero_id);
+        }
+
+        $modulos = $modulosQuery->get();
+
+        // 4. Pasamos todo a la vista
+        return view('admin.modulos.index_all', compact('modulos', 'viveros'));
     }
 }

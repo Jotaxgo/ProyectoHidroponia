@@ -19,7 +19,6 @@ class Modulo extends Model
      */
     protected $fillable = [
         'codigo_identificador',
-        'tipo_sistema',
         'capacidad',
         'estado',
         'vivero_id',
