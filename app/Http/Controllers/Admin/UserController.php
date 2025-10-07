@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Password; // <-- AÑADE ESTO
 use App\Notifications\SendUserInvitation;  // <-- AÑADE ESTO
+use App\Models\Vivero; 
 
 
 class UserController extends Controller
@@ -19,7 +20,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('role', 'viveros')->get(); // Añadimos 'viveros'
+        $users = User::with('role')->withCount('viveros')->get();
         return view('admin.users.index', compact('users'));
     }
 
