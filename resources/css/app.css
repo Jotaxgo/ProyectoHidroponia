@@ -3,34 +3,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ESTILOS PERSONALIZADOS PARA TOM SELECT EN MODO OSCURO */
+/* ESTILOS PERSONALIZADOS PARA TOM SELECT - TEMA HIDROPONIA */
 .ts-control {
-    background-color: #1F2937 !important; /* gray-800 */
-    border-color: #4B5563 !important; /* gray-600 */
+    background-color: #073B3A !important; /* hydro-dark */
+    border-color: #0B6E4F !important;   /* hydro-card */
+    color: #F0F2F5;                     /* hydro-text-light */
 }
 .ts-control input {
-    color: #E5E7EB; /* gray-200 */
+    color: #F0F2F5;
 }
 .ts-control .item {
-    color: #E5E7EB; /* gray-200 */
+    color: #F0F2F5;
 }
 
 .ts-dropdown {
-    background: #1F2937 !important;
-    border-color: #4B5563 !important;
+    background: #073B3A !important;
+    border-color: #0B6E4F !important;
 }
 .ts-dropdown .option {
-    color: #D1D5DB; /* gray-300 */
+    color: #F0F2F5;
 }
 .ts-dropdown .option:hover,
 .ts-dropdown .active {
-    background-color: #374151 !important; /* gray-700 */
+    background-color: #0B6E4F !important;
     color: #FFF !important;
 }
 
 .hydro-nav-link {
     position: relative;
-    padding-bottom: 4px; /* Damos un pequeño espacio para la barra */
+    padding-bottom: 4px;
 }
 
 /* La barra verde que se anima */

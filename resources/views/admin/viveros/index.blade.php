@@ -1,28 +1,28 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-star-light leading-tight">
+        <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
             Gestión de Viveros
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-white">Lista de Viveros</h2>
                     <div class="flex items-center space-x-4">
                         <a href="{{ route('admin.viveros.trash') }}" class="text-gray-400 hover:text-white">Ver Papelera 🗑️</a>
-                        <a href="{{ route('admin.viveros.create') }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-500 transition">
+                        <a href="{{ route('admin.viveros.create') }}" class="inline-flex items-center px-4 py-2 bg-hydro-accent-gold border border-transparent rounded-md font-semibold text-xs text-hydro-dark uppercase tracking-widest hover:opacity-90 transition">
                             Crear Nuevo Vivero
                         </a>
                     </div>
                 </div>
 
-                <div class="mb-4 p-4 bg-gray-900 rounded-lg">
+                <div class="mb-4 p-4 bg-hydro-dark rounded-lg">
                     <form method="GET" action="{{ route('admin.viveros.index') }}">
-                        <label for="filtro-dueño" class="block font-medium text-sm text-gray-300">Filtrar por Dueño</label>
-                        <div class="flex items-center mt-1 space-x-4">
+                        <label for="filtro-dueño" class="block font-medium text-sm text-hydro-text-light mb-1">Filtrar por Dueño</label>
+                        <div class="flex items-center space-x-4">
                             <div class="flex-grow">
                                 <select id="filtro-dueño" name="dueño_id" style="visibility: hidden;">
                                     <option value="">Todos los Dueños</option>
@@ -34,16 +34,20 @@
                                 </select>
                             </div>
                             <div class="flex-shrink-0">
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded">Filtrar</button>
-                                <a href="{{ route('admin.viveros.index') }}" class="text-gray-400 hover:text-white ml-2 py-2 px-4">Limpiar</a>
+                                <button type="submit" class="bg-hydro-accent-bright hover:bg-hydro-accent-light text-hydro-dark font-bold py-2 px-4 rounded transition-colors duration-200">
+                                    Filtrar
+                                </button>
+                                <a href="{{ route('admin.viveros.index') }}" class="py-2 px-4 text-gray-400 hover:text-white transition-colors duration-200">
+                                    Limpiar
+                                </a>
                             </div>
                         </div>
                     </form>
                 </div>
                 
                 <div class="relative overflow-x-auto rounded-lg">
-                    <table class="w-full text-sm text-left text-gray-400">
-                        <thead class="text-xs text-gray-400 uppercase bg-gray-900">
+                    <table class="w-full text-sm text-left text-hydro-text-light">
+                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
                             <tr>
                                 <th scope="col" class="px-6 py-4">Nombre</th>
                                 <th scope="col" class="px-6 py-4">Ubicación</th>
@@ -54,20 +58,22 @@
                         </thead>
                         <tbody>
                             @forelse ($viveros as $vivero)
-                            <tr class="bg-gray-800 border-b border-gray-700">
+                            <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
                                 <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $vivero->nombre }}</th>
                                 <td class="px-6 py-4">{{ $vivero->ubicacion }}</td>
                                 <td class="px-6 py-4">{{ $vivero->user->name ?? 'Sin asignar' }}</td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="font-medium text-blue-400 hover:underline">{{ $vivero->modulos_count }}</a>
+                                    <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="font-bold text-hydro-accent-gold hover:underline">
+                                        {{ $vivero->modulos_count }}
+                                    </a>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-gray-500/20 text-gray-300 rounded-md text-xs hover:bg-gray-500/40 transition">
+                                        <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-light/20 text-hydro-accent-light rounded-md text-xs hover:bg-hydro-accent-light/40 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                             Módulos
                                         </a>
-                                        <a href="{{ route('admin.viveros.edit', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-blue-500/20 text-blue-300 rounded-md text-xs hover:bg-blue-500/40 transition">
+                                        <a href="{{ route('admin.viveros.edit', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
                                             Editar
                                         </a>
@@ -80,16 +86,17 @@
                                             </button>
                                         </form>
                                     </div>
-                                </td>
+                                    </td>
                             </tr>
                             @empty
-                            <tr class="bg-gray-800 border-b border-gray-700">
+                            <tr class="border-b border-hydro-dark">
                                 <td colspan="5" class="px-6 py-4 text-center">No hay viveros registrados.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>

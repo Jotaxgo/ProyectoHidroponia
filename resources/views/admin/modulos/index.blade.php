@@ -1,68 +1,69 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Gestionar Módulos del Vivero: <span class="text-indigo-500">{{ $vivero->nombre }}</span>
+        <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
+            Gestionar Módulos del Vivero: <span class="text-hydro-accent-gold">{{ $vivero->nombre }}</span>
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
 
-                    <div class="mb-4">
-                        <a href="{{ route('admin.viveros.index', $vivero) }}" class="text-indigo-600 hover:text-indigo-900">
-                            &larr; Volver a la lista de viveros
-                        </a>
-                    </div>
+                <div class="mb-4">
+                    <a href="{{ route('admin.viveros.index') }}" class="text-gray-400 hover:text-white">&larr; Volver a los viveros</a>    
+                </div>
 
-                    <div class="mb-4 flex justify-between items-center">
-                        <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Lista de Módulos</h2>
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-gray-400 hover:text-white">Ver Papelera 🗑️</a>
+                        <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="inline-flex items-center px-4 py-2 bg-hydro-accent-gold border border-transparent rounded-md font-semibold text-xs text-hydro-dark uppercase tracking-widest hover:opacity-90 transition">
                             Añadir Nuevo Módulo
                         </a>
-                        <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                            Ver Papelera 🗑️
-                        </a>
                     </div>
+                </div>
 
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+                <div class="relative overflow-x-auto rounded-lg">
+                    <table class="w-full text-sm text-left text-hydro-text-light">
+                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device ID</th> 
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                <th scope="col" class="px-6 py-4">Código</th>
+                                <th scope="col" class="px-6 py-4">Device ID</th>
+                                <th scope="col" class="px-6 py-4">Estado</th>
+                                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200">
+                        <tbody>
                             @forelse ($modulos as $modulo)
-                            <tr>
-                                <td class="px-6 py-4">{{ $modulo->codigo_identificador }}</td>
-                                <td class="px-6 py-4">{{ $modulo->estado }}</td>
+                            <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
+                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $modulo->codigo_identificador }}</th>
                                 <td class="px-6 py-4">{{ $modulo->hardware_info['device_id'] ?? 'N/A' }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-
-                                    <form action="{{ route('admin.viveros.modulos.destroy', [$vivero, $modulo]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-4"
-                                                onclick="return confirm('¿Estás seguro de que quieres eliminar este módulo?')">
-                                            Eliminar
-                                        </button>
-                                    </form>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        @if($modulo->estado == 'Disponible') bg-green-500/20 text-green-300
+                                        @elseif($modulo->estado == 'Ocupado') bg-yellow-500/20 text-yellow-300
+                                        @else bg-red-500/20 text-red-300 @endif">
+                                        {{ $modulo->estado }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">Editar</a>
+                                        <form action="{{ route('admin.viveros.modulos.destroy', [$vivero, $modulo]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">Eliminar</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                                    Este vivero aún no tiene módulos.
-                                </td>
+                            <tr class="border-b border-hydro-dark">
+                                <td colspan="4" class="px-6 py-4 text-center">Este vivero aún no tiene módulos.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>

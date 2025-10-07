@@ -1,58 +1,57 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Papelera de Módulos en: <span class="text-indigo-500">{{ $vivero->nombre }}</span>
+        <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
+            Papelera de Módulos en: <span class="text-hydro-accent-gold">{{ $vivero->nombre }}</span>
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
 
-                    <div class="mb-4">
-                        <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="text-indigo-600 hover:text-indigo-900">
-                            &larr; Volver a la lista de módulos
-                        </a>
-                    </div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">Módulos Eliminados</h2>
+                    <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="text-gray-400 hover:text-white">&larr; Volver a la lista</a>
+                </div>
 
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+                <div class="relative overflow-x-auto rounded-lg">
+                    <table class="w-full text-sm text-left text-hydro-text-light">
+                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo Sistema</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                <th scope="col" class="px-6 py-4">Código</th>
+                                <th scope="col" class="px-6 py-4">Device ID</th>
+                                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200">
+                        <tbody>
                             @forelse ($trashedModulos as $modulo)
-                            <tr>
-                                <td class="px-6 py-4">{{ $modulo->codigo_identificador }}</td>
-                                <td class="px-6 py-4">{{ $modulo->tipo_sistema }}</td>
-                                <td class="px-6 py-4 text-sm font-medium">
-                                    <form action="{{ route('admin.viveros.modulos.restore', [$vivero, $modulo->id]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PUT')
-                                        <button type="submit" class="text-green-600 hover:text-green-900">Restaurar 🔄</button>
-                                    </form>
-                                    <form action="{{ route('admin.viveros.modulos.forceDelete', [$vivero, $modulo->id]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-4"
-                                                onclick="return confirm('¿ELIMINACIÓN PERMANENTE? Esta acción no se puede deshacer.')">
-                                            Borrar para Siempre 🔥
-                                        </button>
-                                    </form>
+                            <tr class="border-b border-hydro-dark">
+                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $modulo->codigo_identificador }}</th>
+                                <td class="px-6 py-4">{{ $modulo->hardware_info['device_id'] ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <form action="{{ route('admin.viveros.modulos.restore', [$vivero, $modulo->id]) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-light/20 text-hydro-accent-light rounded-md text-xs hover:bg-hydro-accent-light/40 transition">Restaurar</button>
+                                        </form>
+                                        <form action="{{ route('admin.viveros.modulos.forceDelete', [$vivero, $modulo->id]) }}" method="POST" class="inline" onsubmit="return confirm('¿ELIMINACIÓN PERMANENTE? Esta acción no se puede deshacer.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">Borrar para Siempre</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="3" class="px-6 py-4 text-center text-gray-500">La papelera está vacía.</td>
+                            <tr class="border-b border-hydro-dark">
+                                <td colspan="3" class="px-6 py-4 text-center">La papelera está vacía.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
