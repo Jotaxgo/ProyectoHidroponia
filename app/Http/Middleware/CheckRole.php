@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
+
 class CheckRole
 {
     /**
@@ -14,14 +15,19 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Verifica si el usuario está logueado Y si su rol coincide con el requerido
-        if (!Auth::check() || Auth::user()->role->nombre_rol !== $role) {
-            // Si no tiene el rol, lo redirigimos al dashboard normal
+        // El operador '...' convierte los roles ('Admin', 'Dueño de Vivero') 
+        // que pasamos en la ruta, en un array como ['Admin', 'Dueño de Vivero'].
+        
+        // Si el usuario no está logueado O si su rol no está en la lista de roles permitidos...
+        if (!Auth::check() || !in_array(Auth::user()->role->nombre_rol, $roles)) {
+            // ...entonces negamos el acceso.
             abort(403, 'Acceso no autorizado.');
         }
 
+        // Si todo está bien, permitimos que la solicitud continúe.
         return $next($request);
     }
 }

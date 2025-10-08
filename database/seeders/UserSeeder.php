@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         if ($ownerRole) {
             $ownerUser = User::create([
                 'name' => 'Juan Dueño',
-                'email' => 'dueño@hidroponia.com',
+                'email' => 'dueno@hidroponia.com',
                 'password' => Hash::make('password'),
                 'role_id' => $ownerRole->id,
             ]);

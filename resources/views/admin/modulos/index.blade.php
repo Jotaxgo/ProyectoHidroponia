@@ -9,9 +9,22 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <a href="{{ route('admin.viveros.index') }}" class="text-gray-400 hover:text-white">&larr; Volver a los viveros</a>    
-                </div>
+                </div> -->
+                <!-- <a href="{{ route('admin.viveros.index') }}" class="text-indigo-600 hover:text-indigo-900">
+                    &larr; Volver a Viveros
+                </a> -->
+
+                @if(Auth::user()->role->nombre_rol == 'Admin')
+                    <a href="{{ route('admin.viveros.index') }}" class="text-gray-400 hover:text-white">
+                        &larr; Volver a la Lista de Viveros
+                    </a>
+                @else
+                    <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-white">
+                        &larr; Volver a mi Dashboard
+                    </a>
+                @endif
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-white">Lista de Módulos</h2>

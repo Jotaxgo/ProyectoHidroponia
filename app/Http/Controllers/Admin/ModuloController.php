@@ -78,6 +78,7 @@ class ModuloController extends Controller
      */
     public function edit(Vivero $vivero, Modulo $modulo)
     {
+        $this->authorize('update', $modulo); // <-- AÑADE ESTA LÍNEA
         return view('admin.modulos.edit', compact('vivero', 'modulo'));
     }
 
@@ -86,6 +87,7 @@ class ModuloController extends Controller
      */
     public function update(Request $request, Vivero $vivero, Modulo $modulo)
     {
+        $this->authorize('update', $modulo);
         $request->validate([
             'codigo_identificador' => ['required', 'string', 'max:255', Rule::unique('modulos')->ignore($modulo->id)],
             'tipo_sistema' => 'required|string|max:255',
@@ -111,7 +113,7 @@ class ModuloController extends Controller
 
         $modulo->update([
             'codigo_identificador' => $request->codigo_identificador,
-            'tipo_sistema' => $request->tipo_sistema,
+            // 'tipo_sistema' => $request->tipo_sistema
             'capacidad' => $request->capacidad,
             'estado' => $request->estado,
             'hardware_info' => $hardwareInfo, // Guardamos el array completo
@@ -126,6 +128,7 @@ class ModuloController extends Controller
      */
     public function destroy(Vivero $vivero, Modulo $modulo)
     {
+        $this->authorize('delete', $modulo);
         $modulo->delete();
 
         return redirect()->route('admin.viveros.modulos.index', $vivero)
