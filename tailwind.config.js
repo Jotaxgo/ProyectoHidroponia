@@ -19,11 +19,13 @@ export default {
             colors: {
                 'hydro-dark': '#073B3A',         // Fondo principal muy oscuro
                 'hydro-card': '#0B6E4F',         // Fondo para tarjetas/tablas
+                'hydro-border': '#0B6E4F',
                 'hydro-accent-bright': '#08A045',// Verde vibrante para acentos
                 'hydro-accent-light': '#6BBF59', // Verde claro para hover/iconos
                 'hydro-accent-gold': '#DDB771',  // Dorado para botones principales
                 'hydro-text-light': '#F0F2F5',    // Un blanco suave para texto
                 'hydro-text-dark': '#073B3A',     // Para texto sobre fondos claros
+                'hydro-hover': '#FFFFFF',
             }
 
             // fontFamily: {

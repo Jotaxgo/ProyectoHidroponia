@@ -19,25 +19,26 @@
                     </div>
                 </div>
 
+
                 <div class="mb-4 p-4 bg-hydro-dark rounded-lg">
                     <form method="GET" action="{{ route('admin.viveros.index') }}">
                         <label for="filtro-dueño" class="block font-medium text-sm text-hydro-text-light mb-1">Filtrar por Dueño</label>
                         <div class="flex items-center space-x-4">
                             <div class="flex-grow">
-                                <select id="filtro-dueño" name="dueño_id" style="visibility: hidden;">
+                                <select id="filtro-dueño" name="dueño_id" class="block w-full bg-hydro-dark border-hydro-border text-white focus:border-hydro-accent-gold focus:ring-hydro-accent-gold rounded-md shadow-sm">
                                     <option value="">Todos los Dueños</option>
                                     @foreach ($dueños as $dueño)
                                         <option value="{{ $dueño->id }}" @if(request('dueño_id') == $dueño->id) selected @endif>
-                                            {{ $dueño->name }}
+                                            {{ $dueño->full_name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="flex-shrink-0">
-                                <button type="submit" class="bg-hydro-accent-bright hover:bg-hydro-accent-light text-hydro-dark font-bold py-2 px-4 rounded transition-colors duration-200">
+                            <div class="flex-shrink-0 flex items-center space-x-2">
+                                <button type="submit" class="w-full justify-center bg-hydro-accent-gold hover:opacity-90 text-hydro-dark font-bold py-2 px-4 rounded transition">
                                     Filtrar
                                 </button>
-                                <a href="{{ route('admin.viveros.index') }}" class="py-2 px-4 text-gray-400 hover:text-white transition-colors duration-200">
+                                <a href="{{ route('admin.viveros.index') }}" class="w-full text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition">
                                     Limpiar
                                 </a>
                             </div>
@@ -50,7 +51,6 @@
                         <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
                             <tr>
                                 <th scope="col" class="px-6 py-4">Nombre</th>
-                                <th scope="col" class="px-6 py-4">Ubicación</th>
                                 <th scope="col" class="px-6 py-4">Dueño</th>
                                 <th scope="col" class="px-6 py-4 text-center">Módulos</th>
                                 <th scope="col" class="px-6 py-4 text-right">Acciones</th>
@@ -60,8 +60,8 @@
                             @forelse ($viveros as $vivero)
                             <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
                                 <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $vivero->nombre }}</th>
-                                <td class="px-6 py-4">{{ $vivero->ubicacion }}</td>
-                                <td class="px-6 py-4">{{ $vivero->user->name ?? 'Sin asignar' }}</td>
+                                <!-- <td class="px-6 py-4">{{ $vivero->ubicacion }}</td> -->
+                                <td class="px-6 py-4">{{ $vivero->user->full_name ?? 'Sin asignar' }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="font-bold text-hydro-accent-gold hover:underline">
                                         {{ $vivero->modulos_count }}
@@ -100,16 +100,5 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            new TomSelect('#filtro-dueño',{
-                onInitialize: function() {
-                    this.wrapper.style.visibility = 'visible';
-                }
-            });
-        });
-    </script>
-    @endpush
+    
 </x-app-layout>

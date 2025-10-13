@@ -110,5 +110,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::get('viveros/{vivero}/modulos/trash', [\App\Http\Controllers\Admin\ModuloController::class, 'trash'])->name('viveros.modulos.trash');
         Route::put('viveros/{vivero}/modulos/{moduloId}/restore', [\App\Http\Controllers\Admin\ModuloController::class, 'restore'])->name('viveros.modulos.restore');
         Route::delete('viveros/{vivero}/modulos/{moduloId}/force-delete', [\App\Http\Controllers\Admin\ModuloController::class, 'forceDelete'])->name('viveros.modulos.forceDelete');
+
+        // RUTAS PARA INICIAR CULTIVO
+        Route::get('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [\App\Http\Controllers\Admin\ModuloController::class, 'showStartCultivoForm'])->name('viveros.modulos.startCultivoForm');
+        Route::post('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [\App\Http\Controllers\Admin\ModuloController::class, 'startCultivo'])->name('viveros.modulos.startCultivo');
     });
 });

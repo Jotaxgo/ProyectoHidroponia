@@ -1,59 +1,63 @@
+/* ================================================ */
+/* 1. IMPORTACIONES (SIEMPRE VAN AL PRINCIPIO)      */
+/* ================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;700&display=swap');
+@import 'select2/dist/css/select2.min.css';
+
+
+/* ================================================ */
+/* 2. DIRECTIVAS DE TAILWIND                         */
+/* ================================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ESTILOS PERSONALIZADOS PARA TOM SELECT - TEMA HIDROPONIA */
-.ts-control {
-    background-color: #073B3A !important; /* hydro-dark */
-    border-color: #0B6E4F !important;   /* hydro-card */
-    color: #F0F2F5;                     /* hydro-text-light */
-}
-.ts-control input {
-    color: #F0F2F5;
-}
-.ts-control .item {
-    color: #F0F2F5;
+
+/* ================================================== */
+/* ESTILOS PERSONALIZADOS PARA SELECT2 - TEMA HIDROPONIA */
+/* ================================================== */
+
+/* El contenedor principal del selector */
+.select2-container--default .select2-selection--single {
+    background-color: theme('colors.hydro-dark');
+    border: 1px solid theme('colors.hydro-border');
+    height: 42px;
+    border-radius: theme('borderRadius.md');
 }
 
-.ts-dropdown {
-    background: #073B3A !important;
-    border-color: #0B6E4F !important;
-}
-.ts-dropdown .option {
-    color: #F0F2F5;
-}
-.ts-dropdown .option:hover,
-.ts-dropdown .active {
-    background-color: #0B6E4F !important;
-    color: #FFF !important;
+/* El texto del item seleccionado */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: theme('colors.hydro-text-light'); /* CORREGIDO */
+    line-height: 40px;
 }
 
-.hydro-nav-link {
-    position: relative;
-    padding-bottom: 4px;
+/* La flecha del desplegable */
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: theme('colors.hydro-text-light') transparent transparent transparent; /* CORREGIDO */
+    margin-top: 4px;
 }
 
-/* La barra verde que se anima */
-.hydro-nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #34d399; /* Color hydro-green */
-
-    /* Empieza invisible */
-    transform: scaleX(0);
-    transform-origin: left;
-
-    /* La animación */
-    transition: transform 0.3s ease-in-out;
+/* El menú desplegable que se abre */
+.select2-dropdown {
+    background-color: theme('colors.hydro-dark');
+    border-color: theme('colors.hydro-border');
 }
 
-/* Cuando pasas el puntero o el enlace está activo */
-.hydro-nav-link:hover::after,
-.hydro-nav-link.active::after {
-    transform: scaleX(1); /* La barra se hace visible */
+/* El campo de búsqueda dentro del menú */
+.select2-search--dropdown .select2-search__field {
+    background-color: theme('colors.hydro-card');
+    border-color: theme('colors.hydro-border');
+    color: theme('colors.hydro-text-light');
+    border-radius: theme('borderRadius.md');
+}
+
+/* Una opción de la lista */
+.select2-results__option {
+    color: theme('colors.hydro-text-light'); /* CORREGIDO */
+}
+
+/* La opción sobre la que pasas el puntero o seleccionas con el teclado */
+.select2-results__option--highlighted[aria-selected] {
+    background-color: theme('colors.hydro-card');
+    color: theme('colors.hydro-hover');
 }

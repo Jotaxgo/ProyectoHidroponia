@@ -35,7 +35,7 @@
                             @forelse ($users as $user)
                             <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
                                 <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">
-                                    {{ $user->name }}
+                                    {{ $user->full_name }}
                                 </th>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4">{{ $user->role->nombre_rol }}</td>

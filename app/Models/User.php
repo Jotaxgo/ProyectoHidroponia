@@ -23,11 +23,22 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'nombres',
+        'primer_apellido',
+        'segundo_apellido',
         'email',
         'password',
-        'role_id', 
+        'role_id',
+        'estado',
     ];
+
+    /**
+     * Accesor para obtener el nombre completo del usuario.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->nombres} {$this->primer_apellido} {$this->segundo_apellido}";
+    }
 
     /**
      * The attributes that should be hidden for serialization.

@@ -25,9 +25,23 @@
                     @csrf
                     @method('PUT')
                     <div class="space-y-6">
-                        <div>
+                        <!-- <div>
                             <label for="name" class="block font-medium text-sm text-hydro-text-light">Nombre del Usuario</label>
                             <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white focus:border-hydro-accent-gold focus:ring-hydro-accent-gold rounded-md shadow-sm">
+                        </div> -->
+                        <div>
+                            <label for="nombres" class="block font-medium text-sm text-hydro-text-light">Nombres</label>
+                            <input id="nombres" name="nombres" type="text" value="{{ old('nombres') }}" required autofocus class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white rounded-md shadow-sm">
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="primer_apellido" class="block font-medium text-sm text-hydro-text-light">Primer Apellido</label>
+                            <input id="primer_apellido" name="primer_apellido" type="text" value="{{ old('primer_apellido') }}" required class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white rounded-md shadow-sm">
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="segundo_apellido" class="block font-medium text-sm text-hydro-text-light">Segundo Apellido (Opcional)</label>
+                            <input id="segundo_apellido" name="segundo_apellido" type="text" value="{{ old('segundo_apellido') }}" class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white rounded-md shadow-sm">
                         </div>
 
                         <div>

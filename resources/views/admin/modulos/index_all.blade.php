@@ -63,7 +63,21 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.viveros.modulos.edit', [$modulo->vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">Editar</a>
+                                    <div class="flex items-center justify-end space-x-2">
+                                        @if($modulo->estado == 'Disponible')
+                                            <a href="{{ route('admin.viveros.modulos.startCultivoForm', [$vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-bright/80 text-white rounded-md text-xs hover:bg-hydro-accent-bright transition">
+                                                Iniciar Cultivo
+                                            </a>
+                                        @endif
+
+                                        <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">Editar</a>
+
+                                        <form action="{{ route('admin.viveros.modulos.destroy', [$vivero, $modulo]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">Eliminar</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty

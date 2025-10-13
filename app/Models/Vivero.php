@@ -13,9 +13,10 @@ class Vivero extends Model
 
     protected $fillable = [
         'nombre',
-        'ubicacion',
         'descripcion',
         'user_id',
+        'latitud',
+        'longitud',
     ];
 
     /**

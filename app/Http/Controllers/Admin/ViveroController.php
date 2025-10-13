@@ -55,7 +55,8 @@ class ViveroController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255|unique:viveros',
             'user_id' => 'required|exists:users,id', // <-- VALIDACIÓN DEL DUEÑO
-            'ubicacion' => 'required|string|max:255',
+            'latitud' => 'required|numeric',
+            'longitud' => 'required|numeric',
             'descripcion' => 'nullable|string',
         ]);
 
@@ -94,7 +95,8 @@ class ViveroController extends Controller
         $request->validate([
             'nombre' => ['required', 'string', 'max:255', Rule::unique('viveros')->ignore($vivero->id)],
             'user_id' => 'required|exists:users,id', // <-- VALIDACIÓN DEL DUEÑO
-            'ubicacion' => 'required|string|max:255',
+            'latitud' => 'required|numeric',
+            'longitud' => 'required|numeric',
             'descripcion' => 'nullable|string',
         ]);
 

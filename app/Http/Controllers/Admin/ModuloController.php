@@ -90,7 +90,7 @@ class ModuloController extends Controller
         $this->authorize('update', $modulo);
         $request->validate([
             'codigo_identificador' => ['required', 'string', 'max:255', Rule::unique('modulos')->ignore($modulo->id)],
-            'tipo_sistema' => 'required|string|max:255',
+            // 'tipo_sistema' => 'required|string|max:255',
             'capacidad' => 'required|integer|min:1',
             'estado' => 'required|string',
             'device_id' => 'nullable|string|max:255',
@@ -189,5 +189,38 @@ class ModuloController extends Controller
 
         // 4. Pasamos todo a la vista
         return view('admin.modulos.index_all', compact('modulos', 'viveros'));
+    }
+
+    /**
+     * Muestra el formulario para iniciar un nuevo cultivo.
+     */
+    public function showStartCultivoForm(Vivero $vivero, Modulo $modulo)
+    {
+        // Verificamos que solo se pueda acceder si el módulo está disponible
+        if ($modulo->estado !== 'Disponible') {
+            return redirect()->back()->with('error', 'Este módulo no está disponible para iniciar un cultivo.');
+        }
+
+        return view('admin.modulos.start-cultivo', compact('vivero', 'modulo'));
+    }
+
+    /**
+     * Guarda la información del nuevo cultivo y actualiza el estado del módulo.
+     */
+    public function startCultivo(Request $request, Vivero $vivero, Modulo $modulo)
+    {
+        $request->validate([
+            'cultivo_actual' => 'required|string|max:255',
+            'fecha_siembra' => 'required|date',
+        ]);
+
+        $modulo->update([
+            'cultivo_actual' => $request->cultivo_actual,
+            'fecha_siembra' => $request->fecha_siembra,
+            'estado' => 'Ocupado',
+        ]);
+
+        return redirect()->route('admin.viveros.modulos.index', $vivero)
+                        ->with('success', "Cultivo iniciado en el módulo {$modulo->codigo_identificador}.");
     }
 }

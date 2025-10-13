@@ -37,9 +37,12 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'nombres' => 'required|string|max:255',
+            'primer_apellido' => 'required|string|max:255',
+            'segundo_apellido' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'role_id' => 'required|exists:roles,id',
+            // ... validación condicional del vivero
         ]);
 
         $role = Role::find($request->role_id);
@@ -48,12 +51,15 @@ class UserController extends Controller
         if ($role && $role->nombre_rol == 'Dueño de Vivero') {
             $request->validate([
                 'vivero_nombre' => 'required|string|max:255|unique:viveros,nombre',
-                'vivero_ubicacion' => 'required|string|max:255',
+                'latitud' => 'required|numeric',
+                'longitud' => 'required|numeric',
             ]);
         }
 
         $user = User::create([
-            'name' => $request->name,
+            'nombres' => $request->nombres,
+            'primer_apellido' => $request->primer_apellido,
+            'segundo_apellido' => $request->segundo_apellido,
             'email' => $request->email,
             'password' => null,
             'role_id' => $request->role_id,
@@ -63,7 +69,8 @@ class UserController extends Controller
         if ($role && $role->nombre_rol == 'Dueño de Vivero') {
             $user->viveros()->create([
                 'nombre' => $request->vivero_nombre,
-                'ubicacion' => $request->vivero_ubicacion,
+                'latitud' => $request->latitud,
+                'longitud' => $request->longitud,
                 'descripcion' => $request->vivero_descripcion,
             ]);
         }
