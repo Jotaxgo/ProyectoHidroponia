@@ -53,7 +53,7 @@
                                 <th scope="col" class="px-6 py-4">Nombre</th>
                                 <th scope="col" class="px-6 py-4">Dueño</th>
                                 <th scope="col" class="px-6 py-4 text-center">Módulos</th>
-                                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
+                                <th scope="col" class="px-6 py-4 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,6 +69,9 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
+                                        <a href="{{ route('admin.viveros.show', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-gray-500/20 text-gray-300 rounded-md text-xs hover:bg-gray-500/40 transition">
+                                            Ver Detalles
+                                        </a>
                                         <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-light/20 text-hydro-accent-light rounded-md text-xs hover:bg-hydro-accent-light/40 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                             Módulos

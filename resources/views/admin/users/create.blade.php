@@ -91,29 +91,45 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var initialLat = -17.3935; // Cochabamba
-            var initialLng = -66.1570;
-            var initialZoom = 12;
+            // Revisa si el elemento del mapa existe en la página
+            if (document.getElementById('map')) {
+                var initialLat = -17.3935; // Cochabamba
+                var initialLng = -66.1570;
+                var initialZoom = 12;
 
-            var map = L.map('map').setView([initialLat, initialLng], initialZoom);
+                var map = L.map('map').setView([initialLat, initialLng], initialZoom);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
 
-            var marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+                var marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
 
-            var latInput = document.querySelector("#latitud");
-            var lngInput = document.querySelector("#longitud");
+                var latInput = document.querySelector("#latitud");
+                var lngInput = document.querySelector("#longitud");
 
-            function updateInputs() {
-                var latlng = marker.getLatLng();
-                latInput.value = latlng.lat;
-                lngInput.value = latlng.lng;
+                function updateInputs() {
+                    var latlng = marker.getLatLng();
+                    latInput.value = latlng.lat;
+                    lngInput.value = latlng.lng;
+                }
+
+                marker.on('dragend', updateInputs);
+                updateInputs();
+
+                // --- EL ARREGLO ---
+                // Usamos un observador para detectar cuándo el mapa se hace visible
+                const observer = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        // Usamos un pequeño retraso para asegurar que la animación de Alpine.js termine
+                        setTimeout(function () {
+                            map.invalidateSize();
+                        }, 100);
+                    }
+                }, { threshold: 0.1 });
+
+                observer.observe(document.getElementById('map'));
             }
-
-            marker.on('dragend', updateInputs);
-            updateInputs(); // Llama a la función al inicio para poblar los campos
         });
     </script>
     @endpush

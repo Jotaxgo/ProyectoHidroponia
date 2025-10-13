@@ -66,11 +66,11 @@ class ViveroController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un vivero específico.
      */
-    public function show(string $id)
+    public function show(Vivero $vivero)
     {
-        //
+        return view('admin.viveros.show', compact('vivero'));
     }
 
     /**

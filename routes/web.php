@@ -85,17 +85,19 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // --- RUTAS SOLO PARA ADMIN (Gestión de Usuarios y Viveros) ---
     Route::middleware(['role:Admin'])->group(function () {
         // Usuarios
-        Route::resource('users', UserController::class)->except(['show']);
         Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
         Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
         Route::get('users/{user}/viveros', [UserController::class, 'showViveros'])->name('users.showViveros');
 
         // Viveros
-        Route::resource('viveros', ViveroController::class)->except(['show']);
         Route::get('viveros/trash', [ViveroController::class, 'trash'])->name('viveros.trash');
         Route::put('viveros/{id}/restore', [ViveroController::class, 'restore'])->name('viveros.restore');
         Route::delete('viveros/{id}/force-delete', [ViveroController::class, 'forceDelete'])->name('viveros.forceDelete');
+
+        // --- Recursos (Rutas Generales) ---
+        Route::resource('users', UserController::class)->except(['show']);
+        Route::resource('viveros', ViveroController::class); // Ya no excluimos 'show'
     });
 
     // --- RUTAS PARA ADMIN Y DUEÑO DE VIVERO (Gestión de Módulos) ---

@@ -9,19 +9,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Modulo extends Model
 {
-    use HasFactory;
     use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'codigo_identificador',
         'capacidad',
         'estado',
         'vivero_id',
+        'cultivo_actual',
+        'fecha_siembra',
+        'hardware_info',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'hardware_info' => 'array', // <-- LA LÍNEA QUE FALTABA
     ];
 
     /**
