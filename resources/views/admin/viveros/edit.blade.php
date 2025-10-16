@@ -31,27 +31,23 @@
                         </div>
                         
                         <div>
-                            <label for="user_id" id="select-dueño" class="block font-medium text-sm text-hydro-text-light">Asignar Dueño</label>
-                            <select name="user_id" id="user_id" class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white focus:border-hydro-accent-gold focus:ring-hydro-accent-gold rounded-md shadow-sm">
+                            <label for="select-dueño" class="block font-medium text-sm text-hydro-text-light">Asignar Dueño</label>
+                            <select name="user_id" id="select-dueño" class="block mt-1 w-full">
                                 @foreach ($dueños as $dueño)
                                     <option value="{{ $dueño->id }}" @if($vivero->user_id == $dueño->id) selected @endif>
-                                        {{ $dueño->name }}
+                                        {{ $dueño->full_name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- <div>
-                            <label for="ubicacion" class="block font-medium text-sm text-hydro-text-light">Ubicación</label>
-                            <input id="ubicacion" name="ubicacion" type="text" value="{{ old('ubicacion', $vivero->ubicacion) }}" required class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white focus:border-hydro-accent-gold focus:ring-hydro-accent-gold rounded-md shadow-sm">
-                        </div> -->
                         <div>
                             <label class="block font-medium text-sm text-hydro-text-light">Ubicación (Arrastra el marcador)</label>
-                            <div id="map" style="height: 400px; width: 100%;" class="mt-1 rounded-md"></div>
+                            <div id="map" style="height: 400px; width: 100%;" class="mt-1 rounded-md z-0"></div>
                         </div>
 
-                        <input type="hidden" name="latitud" id="latitud">
-                        <input type="hidden" name="longitud" id="longitud">
+                        <input type="hidden" name="latitud" id="latitud" value="{{ old('latitud', $vivero->latitud) }}">
+                        <input type="hidden" name="longitud" id="longitud" value="{{ old('longitud', $vivero->longitud) }}">
 
                         <div>
                             <label for="descripcion" class="block font-medium text-sm text-hydro-text-light">Descripción (opcional)</label>
@@ -69,78 +65,35 @@
             </div>
         </div>
     </div>
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Coordenadas iniciales (Cochabamba)
-            var initialLat = -17.3935;
-            var initialLng = -66.1570;
-            var initialZoom = 12; // Un zoom más cercano para ver la ciudad
+            // --- INICIALIZACIÓN DE SELECT2 ---
+            $('#select-dueño').select2();
 
-            // Inicializar el mapa
+            // --- INICIALIZACIÓN DEL MAPA ---
+            // Usamos las coordenadas guardadas del vivero, o las de Cochabamba si no existen.
+            var initialLat = {{ old('latitud', $vivero->latitud) ?? -17.3935 }};
+            var initialLng = {{ old('longitud', $vivero->longitud) ?? -66.1570 }};
+            var initialZoom = {{ ($vivero->latitud && $vivero->longitud) ? 15 : 12 }};
+
             var map = L.map('map').setView([initialLat, initialLng], initialZoom);
-
-            // Añadir la capa de mapa
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            // Añadir un marcador arrastrable
-            var marker = L.marker([initialLat, initialLng], {
-                draggable: true
-            }).addTo(map);
+            var marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
 
-            // Campos ocultos
             var latInput = document.querySelector("#latitud");
             var lngInput = document.querySelector("#longitud");
 
-            // Función para actualizar los campos
             function updateInputs(latlng) {
                 latInput.value = latlng.lat;
                 lngInput.value = latlng.lng;
             }
-
-            // Escuchar el evento de arrastre del marcador
-            marker.on('dragend', function() {
-                updateInputs(marker.getLatLng());
-            });
             
-            // --- LÓGICA DE GEOLOCALIZACIÓN (NUEVO) ---
-            // 1. Revisa si el navegador soporta la geolocalización
-            if ('geolocation' in navigator) {
-                // 2. Pide la ubicación actual
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    // 3. Si el usuario da permiso, actualizamos las coordenadas
-                    var userLat = position.coords.latitude;
-                    var userLng = position.coords.longitude;
-                    var userLatLng = L.latLng(userLat, userLng);
-
-                    // Movemos el mapa y el marcador a la ubicación del usuario
-                    map.setView(userLatLng, 13); // Zoom más cercano
-                    marker.setLatLng(userLatLng);
-                    updateInputs(userLatLng);
-
-                }, function(error) {
-                    // Si el usuario niega el permiso o hay un error, no hacemos nada.
-                    // El mapa se quedará en la vista por defecto de Bolivia.
-                    console.log("Error de geolocalización: ", error.message);
-                    updateInputs(marker.getLatLng()); // Actualizamos con la pos. inicial
-                });
-            } else {
-                // Si el navegador no es compatible, inicializamos con los valores por defecto
-                console.log("Geolocalización no soportada por este navegador.");
-                updateInputs(marker.getLatLng());
-            }
-            // --- FIN DE LA LÓGICA ---
-        });
-    </script>
-    @endpush
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            new TomSelect('#select-dueño',{
-                placeholder: 'Selecciona un dueño...'
-            });
+            marker.on('dragend', function() { updateInputs(marker.getLatLng()); });
         });
     </script>
     @endpush

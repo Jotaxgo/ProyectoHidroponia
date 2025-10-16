@@ -2,119 +2,91 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ViveroController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\ModuloController;
+use App\Http\Controllers\Admin\ReporteController;
+use App\Http\Controllers\Auth\SetPasswordController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
-// Ruta de bienvenida
+// --- 1. RUTA PÚBLICA (PARA VISITANTES) ---
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])->name('dashboard');
+// --- 2. RUTAS DE AUTENTICACIÓN (login, logout, etc.) ---
+// Esta línea es crucial y debe estar aquí, fuera de cualquier grupo 'auth'.
+require __DIR__.'/auth.php';
 
-// Rutas del perfil de usuario de Breeze
-Route::middleware('auth')->group(function () {
+// --- RUTAS PÚBLICAS PARA INVITACIÓN DE USUARIOS ---
+Route::get('/establecer-contraseña/{token}', [SetPasswordController::class, 'create'])
+    ->name('invitation.set-password');
+Route::post('/establecer-contraseña', [SetPasswordController::class, 'store'])
+    ->name('invitation.store-password');
+
+
+// --- 3. RUTAS PROTEGIDAS (PARA USUARIOS QUE YA INICIARON SESIÓN) ---
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // El dashboard principal que redirige según el rol
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Rutas del perfil del usuario logueado
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// --- RUTAS PARA ESTABLECER CONTRASEÑA POR INVITACIÓN ---
-Route::get('/establecer-contraseña/{token}', [\App\Http\Controllers\Auth\SetPasswordController::class, 'create'])
-    ->name('invitation.set-password');
 
-Route::post('/establecer-contraseña', [\App\Http\Controllers\Auth\SetPasswordController::class, 'store'])
-    ->name('invitation.store-password');
-
-// Incluye las rutas de autenticación (login, register, etc.)
-require __DIR__.'/auth.php';
-
-
-// --- GRUPO DE RUTAS PARA EL ADMIN ---
-// Route::middleware(['auth', 'verified', 'role:Admin'])
-//     ->prefix('admin')
-//     ->name('admin.')
-//     ->group(function () {
-        
-//     // --- RECURSOS PRINCIPALES ---
-//     Route::resource('users', UserController::class)->except(['show']);
-//     // Route::resource('viveros', ViveroController::class)->except(['show']);
-//     Route::get('users/{user}/viveros', [UserController::class, 'showViveros'])->name('users.showViveros'); 
-//     Route::resource('viveros', ViveroController::class)->except(['show']);
-//     Route::resource('viveros.modulos', \App\Http\Controllers\Admin\ModuloController::class)->except(['show']);
-
-//     // RUTA PARA LA VISTA GENERAL DE MÓDULOS (AÑADIR)
-//     Route::get('modulos', [\App\Http\Controllers\Admin\ModuloController::class, 'indexAll'])->name('modulos.indexAll');
-
-//     // --- RUTAS PARA LA PAPELERA DE USUARIOS ---
-//     Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
-//     Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
-//     Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
-
-//     // --- RUTAS PARA LA PAPELERA DE VIVEROS ---
-//     Route::get('viveros/trash', [ViveroController::class, 'trash'])->name('viveros.trash');
-//     Route::put('viveros/{id}/restore', [ViveroController::class, 'restore'])->name('viveros.restore');
-//     Route::delete('viveros/{id}/force-delete', [ViveroController::class, 'forceDelete'])->name('viveros.forceDelete');
-
-//     // --- RUTAS PARA LA PAPELERA DE MÓDULOS ---
-//     Route::get('viveros/{vivero}/modulos/trash', [\App\Http\Controllers\Admin\ModuloController::class, 'trash'])
-//         ->name('viveros.modulos.trash');
-//     Route::put('viveros/{vivero}/modulos/{moduloId}/restore', [\App\Http\Controllers\Admin\ModuloController::class, 'restore'])
-//         ->name('viveros.modulos.restore');
-//     Route::delete('viveros/{vivero}/modulos/{moduloId}/force-delete', [\App\Http\Controllers\Admin\ModuloController::class, 'forceDelete'])
-//         ->name('viveros.modulos.forceDelete');
-            
-// });
-
-// --- GRUPO DE RUTAS PARA EL PANEL DE ADMINISTRACIÓN ---
+// --- 4. RUTAS DE ADMINISTRACIÓN (CON PREFIJO /admin) ---
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
-
-    // --- RUTAS SOLO PARA ADMIN (Gestión de Usuarios y Viveros) ---
+    
+    // --- RUTAS SOLO PARA ADMIN ---
     Route::middleware(['role:Admin'])->group(function () {
-        // Usuarios
+        // Rutas específicas de Usuarios (papelera, etc.)
         Route::get('users/trash', [UserController::class, 'trash'])->name('users.trash');
         Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.forceDelete');
         Route::get('users/{user}/viveros', [UserController::class, 'showViveros'])->name('users.showViveros');
 
-        // Viveros
+        // Rutas específicas de Viveros (papelera, etc.)
         Route::get('viveros/trash', [ViveroController::class, 'trash'])->name('viveros.trash');
         Route::put('viveros/{id}/restore', [ViveroController::class, 'restore'])->name('viveros.restore');
         Route::delete('viveros/{id}/force-delete', [ViveroController::class, 'forceDelete'])->name('viveros.forceDelete');
 
-        // --- Recursos (Rutas Generales) ---
+        // Recursos (rutas generales)
         Route::resource('users', UserController::class)->except(['show']);
-        Route::resource('viveros', ViveroController::class); // Ya no excluimos 'show'
+        Route::resource('viveros', ViveroController::class);
     });
 
-    // --- RUTAS PARA ADMIN Y DUEÑO DE VIVERO (Gestión de Módulos) ---
+    // --- RUTAS PARA ADMIN Y DUEÑO DE VIVERO ---
     Route::middleware(['role:Admin,Dueño de Vivero'])->group(function () {
         // Vista general de todos los módulos
-        Route::get('modulos', [\App\Http\Controllers\Admin\ModuloController::class, 'indexAll'])->name('modulos.indexAll');
-
-        // CRUD anidado de Módulos
-        Route::resource('viveros.modulos', \App\Http\Controllers\Admin\ModuloController::class)->except(['show']);
-
+        Route::get('modulos', [ModuloController::class, 'indexAll'])->name('modulos.indexAll');
+        
         // Papelera de Módulos
-        Route::get('viveros/{vivero}/modulos/trash', [\App\Http\Controllers\Admin\ModuloController::class, 'trash'])->name('viveros.modulos.trash');
-        Route::put('viveros/{vivero}/modulos/{moduloId}/restore', [\App\Http\Controllers\Admin\ModuloController::class, 'restore'])->name('viveros.modulos.restore');
-        Route::delete('viveros/{vivero}/modulos/{moduloId}/force-delete', [\App\Http\Controllers\Admin\ModuloController::class, 'forceDelete'])->name('viveros.modulos.forceDelete');
+        Route::get('viveros/{vivero}/modulos/trash', [ModuloController::class, 'trash'])->name('viveros.modulos.trash');
+        Route::put('viveros/{vivero}/modulos/{moduloId}/restore', [ModuloController::class, 'restore'])->name('viveros.modulos.restore');
+        Route::delete('viveros/{vivero}/modulos/{moduloId}/force-delete', [ModuloController::class, 'forceDelete'])->name('viveros.modulos.forceDelete');
+        
+        // Operaciones de Módulos
+        Route::get('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [ModuloController::class, 'showStartCultivoForm'])->name('viveros.modulos.startCultivoForm');
+        Route::post('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [ModuloController::class, 'startCultivo'])->name('viveros.modulos.startCultivo');
+        
+        // CRUD anidado de Módulos
+        Route::resource('viveros.modulos', ModuloController::class)->except(['show']);
 
-        // RUTAS PARA INICIAR CULTIVO
-        Route::get('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [\App\Http\Controllers\Admin\ModuloController::class, 'showStartCultivoForm'])->name('viveros.modulos.startCultivoForm');
-        Route::post('viveros/{vivero}/modulos/{modulo}/iniciar-cultivo', [\App\Http\Controllers\Admin\ModuloController::class, 'startCultivo'])->name('viveros.modulos.startCultivo');
+        // Reportes
+        Route::get('reportes/modulo', [ReporteController::class, 'showModuleReportForm'])->name('reportes.module.form');
+        Route::get('reportes/modulo/vista', [ReporteController::class, 'showModuleReportPreview'])->name('reportes.module.show');
+        Route::get('reportes/modulo/descargar', [ReporteController::class, 'generateModuleReport'])->name('reportes.module.download');
+        Route::get('reportes/viveros', [ReporteController::class, 'showViverosReport'])->name('reportes.viveros.show');
+        Route::get('reportes/viveros/descargar', [ReporteController::class, 'downloadViverosReport'])->name('reportes.viveros.download');
     });
 });
