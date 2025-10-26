@@ -14,6 +14,12 @@
                     <a href="{{ route('admin.users.index') }}" class="text-gray-400 hover:text-white">&larr; Volver a la lista</a>
                 </div>
 
+                @if (session('success'))
+                    <div class="bg-green-500/20 text-green-300 p-4 rounded mb-4">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="bg-red-500/20 text-red-300 p-4 rounded mb-4">{{ session('error') }}</div>
+                @endif
                 <div class="relative overflow-x-auto rounded-lg">
                     <table class="w-full text-sm text-left text-hydro-text-light">
                         <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
@@ -26,7 +32,7 @@
                         <tbody>
                             @forelse ($trashedUsers as $user)
                             <tr class="border-b border-hydro-dark">
-                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $user->name }}</th>
+                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $user->full_name }}</th>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">

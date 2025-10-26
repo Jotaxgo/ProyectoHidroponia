@@ -16,22 +16,24 @@ class ViveroController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtenemos la lista de todos los posibles dueños
+        // Obtenemos la lista de todos los posibles dueños para el filtro
         $ownerRole = Role::where('nombre_rol', 'Dueño de Vivero')->first();
         $dueños = User::where('role_id', $ownerRole->id)->get();
 
-        // Empezamos la consulta de viveros
+        // --- LA CORRECCIÓN ESTÁ AQUÍ ---
+        // Empezamos la consulta de viveros, siempre cargando la relación con el dueño
         $viverosQuery = Vivero::with('user')->withCount('modulos');
 
-        // Aplicamos el filtro si se envió uno
+        // Si en la URL viene un filtro de dueño, lo aplicamos
         if ($request->filled('dueño_id')) {
             $viverosQuery->where('user_id', $request->dueño_id);
         }
 
         $viveros = $viverosQuery->get();
+        
 
         return view('admin.viveros.index', compact('viveros', 'dueños'));
-    }   
+    }
 
     /**
      * Muestra el formulario para crear un nuevo vivero.
@@ -94,7 +96,7 @@ class ViveroController extends Controller
     {
         $request->validate([
             'nombre' => ['required', 'string', 'max:255', Rule::unique('viveros')->ignore($vivero->id)],
-            'user_id' => 'required|exists:users,id', // <-- VALIDACIÓN DEL DUEÑO
+            'user_id' => 'required|exists:users,id',
             'latitud' => 'required|numeric',
             'longitud' => 'required|numeric',
             'descripcion' => 'nullable|string',
@@ -102,6 +104,21 @@ class ViveroController extends Controller
 
         $vivero->update($request->all());
 
+        // --- LÓGICA DE REDIRECCIÓN INTELIGENTE ---
+        // 1. Revisa si existe la "nota" en la sesión.
+        if (session()->has('redirect_after_update')) {
+            // 2. Obtenemos la URL guardada.
+            $redirectUrl = session('redirect_after_update');
+
+            // 3. Eliminamos la "nota" para que no afecte a futuras actualizaciones.
+            session()->forget('redirect_after_update');
+
+            // 4. Redirigimos a la URL guardada (la papelera de usuarios).
+            return redirect($redirectUrl)->with('success', 'Vivero reasignado. Ahora puedes eliminar al usuario original.');
+        }
+        // --- FIN DE LA LÓGICA ---
+
+        // Si no hay "nota", hacemos la redirección normal.
         return redirect()->route('admin.viveros.index')->with('success', 'Vivero actualizado exitosamente.');
     }
 

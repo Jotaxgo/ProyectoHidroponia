@@ -2,22 +2,20 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Vivero;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Role; // <-- Añade esta línea si no la tienes
+use App\Models\Vivero; // <-- Añade esta línea si no la tienes
 
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-    // --- Y LUEGO AÑADE ESTA LÍNEA AQUÍ DENTRO ---
-    use HasFactory, Notifiable, SoftDeletes;
-    use HasApiTokens, HasFactory, Notifiable; 
+    // Unifica todos los traits en una sola línea
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -73,7 +71,7 @@ class User extends Authenticatable
      * Los viveros que pertenecen al usuario.
      * The nurseries that belong to the user.
      */
-    public function viveros() 
+    public function viveros(): HasMany
     {
         return $this->hasMany(Vivero::class);
     }

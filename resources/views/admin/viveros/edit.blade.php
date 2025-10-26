@@ -2,7 +2,14 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
             Editar Vivero
+            @if (session('info'))
+                <div class="bg-blue-500/20 text-blue-300 p-4 rounded mb-6">
+                    {{ session('info') }}
+                </div>
+            @endif
         </h2>
+        
+        
     </x-slot>
 
     <div class="py-12">

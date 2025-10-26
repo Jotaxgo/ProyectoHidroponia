@@ -154,18 +154,28 @@ class UserController extends Controller
     public function forceDelete($id)
     {
         $user = User::withTrashed()->findOrFail($id);
+        $viveros = $user->viveros; // Obtenemos la colección de viveros del usuario
 
-        // Contamos cuántos viveros le pertenecen a este usuario.
-        if ($user->viveros()->count() > 0) {
-            // Obtenemos los nombres de los viveros
-            $viveroNames = $user->viveros->pluck('nombre')->join(', ');
+        // CASO 1: Si el usuario tiene exactamente UN vivero
+        if ($viveros->count() === 1) {
+            $viveroAReasignar = $viveros->first();
 
-            // Creamos un mensaje de error más específico
-            $errorMessage = "Este usuario no puede ser eliminado porque es dueño del/los vivero(s): {$viveroNames}. Por favor, reasigna estos viveros a otro dueño primero.";
+            // AÑADIMOS UNA "NOTA" A LA SESIÓN PARA SABER A DÓNDE VOLVER
+            session()->put('redirect_after_update', route('admin.users.trash'));
+            
+            // Redirigimos a la página para editar ese vivero con un mensaje
+            return redirect()->route('admin.viveros.edit', $viveroAReasignar)
+                            ->with('info', "Para poder eliminar a {$user->full_name}, primero debes reasignar este vivero a otro dueño.");
 
-            return redirect()->route('admin.users.trash')->with('error', $errorMessage);
+        // CASO 2: Si el usuario tiene MÁS DE UN vivero
+        } elseif ($viveros->count() > 1) {
+            $viveroNames = $viveros->pluck('nombre')->join(', ');
+            $errorMessage = "Este usuario no puede ser eliminado porque es dueño de los siguientes viveros: {$viveroNames}. Por favor, reasígnalos a otro dueño primero.";
+            // Redirigimos de vuelta a la papelera con el error
+            return redirect()->back()->with('error', $errorMessage);
         }
 
+        // CASO 3: Si no tiene viveros, se puede borrar
         $user->forceDelete();
 
         return redirect()->route('admin.users.trash')->with('success', 'Usuario eliminado permanentemente.');
