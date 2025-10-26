@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Asegúrate de tener esto
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Modulo extends Model
@@ -21,20 +22,20 @@ class Modulo extends Model
         'hardware_info',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
-        'hardware_info' => 'array', // <-- LA LÍNEA QUE FALTABA
+        'hardware_info' => 'array',
     ];
 
-    /**
-     * Obtiene el vivero al que pertenece el módulo.
-     */
     public function vivero(): BelongsTo
     {
         return $this->belongsTo(Vivero::class);
+    }
+
+    /**
+     * Define la relación donde un Módulo tiene muchas Lecturas de Sensores.
+     */
+    public function lecturas(): HasMany
+    {
+        return $this->hasMany(LecturaSensor::class);
     }
 }

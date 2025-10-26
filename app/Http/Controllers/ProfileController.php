@@ -57,4 +57,31 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Crea un nuevo API token para el usuario.
+     */
+    public function createToken(Request $request)
+    {
+        $request->validate([
+            'token_name' => 'required|string|max:255',
+        ]);
+
+        // Genera el token usando Sanctum
+        $token = $request->user()->createToken($request->token_name);
+
+        // Redirige de vuelta al perfil con el nuevo token para mostrarlo una sola vez
+        return back()->with('newToken', $token->plainTextToken);
+    }
+
+    /**
+     * Elimina un API token específico del usuario.
+     */
+    public function destroyToken(Request $request, $tokenId)
+    {
+        // Busca el token y lo elimina
+        $request->user()->tokens()->where('id', $tokenId)->delete();
+
+        return back()->with('status', 'token-deleted');
+    }
 }

@@ -41,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // --- RUTAS PARA GESTIONAR API TOKENS ---
+    Route::post('/profile/tokens', [\App\Http\Controllers\ProfileController::class, 'createToken'])->name('profile.tokens.create');
+    Route::delete('/profile/tokens/{tokenId}', [\App\Http\Controllers\ProfileController::class, 'destroyToken'])->name('profile.tokens.destroy');
 });
 
 
