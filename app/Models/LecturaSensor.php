@@ -17,6 +17,8 @@ class LecturaSensor extends Model
         'temperatura',
         'ph',
         'humedad',
+        'ec',
+        'luz',
     ];
 
     public function modulo()

@@ -1,4 +1,4 @@
-<div class="text-hydro-text-light space-y-2 mb-6">
+    <div class="text-hydro-text-light space-y-2 mb-6">
     <p><strong>Módulo:</strong> {{ $modulo->codigo_identificador }}</p>
     <p><strong>Vivero:</strong> {{ $modulo->vivero->nombre }}</p>
     <p><strong>Dueño:</strong> {{ $modulo->vivero->user->full_name }}</p>
@@ -12,6 +12,8 @@
                 <th scope="col" class="px-6 py-4">Fecha</th>
                 <th scope="col" class="px-6 py-4">Temperatura (°C)</th>
                 <th scope="col" class="px-6 py-4">Nivel de pH</th>
+                <th scope="col" class="px-6 py-4">EC</th>
+                <th scope="col" class="px-6 py-4">Intensidad de la Luz</th>
             </tr>
         </thead>
         <tbody>
@@ -20,6 +22,8 @@
                     <td class="px-6 py-4">{{ $lectura['fecha'] }}</td>
                     <td class="px-6 py-4">{{ $lectura['temperatura'] }}</td>
                     <td class="px-6 py-4">{{ $lectura['ph'] }}</td>
+                    <td class="px-6 py-4">{{ $lectura['ec'] ?? 'NA'}}</td>
+                    <td class="px-6 py-4">{{ $lectura['luz'] ?? 'NA' }}</td>
                 </tr>
             @empty
                 <tr class="border-b border-hydro-dark">

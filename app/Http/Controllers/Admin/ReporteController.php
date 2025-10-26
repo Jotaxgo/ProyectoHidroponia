@@ -79,6 +79,8 @@ class ReporteController extends Controller
                 'fecha' => $fecha->format('d/m/Y'),
                 'temperatura' => rand(180, 250) / 10,
                 'ph' => rand(55, 75) / 10,
+                'ec' => rand(12, 25) / 10,
+                'luz' => rand(700, 1200),
             ];
         }
 
@@ -132,6 +134,8 @@ class ReporteController extends Controller
                 'fecha' => $fecha->format('d/m/Y'),
                 'temperatura' => rand(180, 250) / 10,
                 'ph' => rand(55, 75) / 10,
+                'ec' => rand(12, 25) / 10,
+                'luz' => rand(700, 1200),
             ];
         }
 
