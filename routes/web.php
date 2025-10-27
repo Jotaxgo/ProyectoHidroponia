@@ -77,6 +77,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
         // NUEVA RUTA PARA EL HISTORIAL DE GRÁFICOS
         Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getModuleHistory']);
+
+       
         
     });
 
@@ -103,5 +105,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::get('reportes/modulo/descargar', [ReporteController::class, 'generateModuleReport'])->name('reportes.module.download');
         Route::get('reportes/viveros', [ReporteController::class, 'showViverosReport'])->name('reportes.viveros.show');
         Route::get('reportes/viveros/descargar', [ReporteController::class, 'downloadViverosReport'])->name('reportes.viveros.download');
+
+         Route::get('/vivero/{vivero}/latest-data', [App\Http\Controllers\Api\ApiOwnerDashboardController::class, 'getOwnerModuleData'])->name('owner.vivero.latestData');
     });
 });
