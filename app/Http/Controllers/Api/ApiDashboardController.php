@@ -22,55 +22,56 @@ class ApiDashboardController extends Controller
      * Devuelve la última lectura de cada módulo de cultivo activo.
      * ... (código getLatestModuleData anterior)
      */
+    
     public function getLatestModuleData()
     {
-        // ... (código getLatestModuleData anterior, asumo que está correcto)
+        // 1. Seleccionar siempre 'cultivo_actual'
         $modulosActivos = Modulo::where('estado', '!=', 'Disponible')
-            ->select('id', 'codigo_identificador')
+            ->select('id', 'codigo_identificador', 'cultivo_actual') // Asegurado
             ->get();
 
         $latestData = [];
 
         foreach ($modulosActivos as $modulo) {
-            
             $latestReading = LecturaSensor::where('modulo_id', $modulo->id)
-                ->latest('created_at') 
+                ->latest('created_at')
                 ->first();
 
+            $estadoAlerta = 'OK';
+            $tiempoDesdeUltimaLectura = null;
+            $ultimaLecturaTimestamp = null;
+
             if ($latestReading) {
-                // Cálculo de tiempo para el estado offline
-                $tiempoDesdeUltimaLectura = Carbon::parse($latestReading->created_at)->diffInMinutes();
-                $isOffline = $tiempoDesdeUltimaLectura > self::OFFLINE_THRESHOLD_MINUTES;
+                $ultimaLecturaTimestamp = Carbon::parse($latestReading->created_at);
+                $tiempoDesdeUltimaLectura = $ultimaLecturaTimestamp->diffInMinutes();
 
-                // Lógica de alerta para la tabla
-                $estadoAlerta = 'OK';
-                if ($isOffline) {
-                    $estadoAlerta = 'Offline';
-                } elseif ($latestReading->ph < self::PH_MIN || $latestReading->ph > self::PH_MAX) {
-                    $estadoAlerta = 'Crítico (pH)';
-                } elseif ($latestReading->ec < self::EC_MIN || $latestReading->ec > self::EC_MAX) {
-                    $estadoAlerta = 'Crítico (EC)';
+                if ($tiempoDesdeUltimaLectura > self::OFFLINE_THRESHOLD_MINUTES) {
+                    $estadoAlerta = 'OFFLINE';
+                } elseif (/* ... Crítico ... */ (float)$latestReading->ph < (self::PH_MIN - 0.5) || (float)$latestReading->ph > (self::PH_MAX + 0.5)) { // Cast a float
+                    $estadoAlerta = 'CRÍTICO';
+                } elseif (/* ... Advertencia ... */ (float)$latestReading->ph < self::PH_MIN || (float)$latestReading->ph > self::PH_MAX || (float)$latestReading->temperatura > self::TEMP_MAX) { // Cast a float
+                    $estadoAlerta = 'ADVERTENCIA';
                 }
-                
-                $latestData[] = [
-                    'modulo_id' => $modulo->id,
-                    'nombre_modulo' => $modulo->codigo_identificador, 
-                    'ph' => $latestReading->ph, 
-                    'ec' => $latestReading->ec,
-                    'temperatura' => $latestReading->temperatura, 
-                    'luz' => $latestReading->luz,
-                    'ultimo_reporte_minutos' => $isOffline ? $tiempoDesdeUltimaLectura : null,
-                    'estado_alerta' => $estadoAlerta,
-                ];
             } else {
-                $latestData[] = [
-                    'modulo_id' => $modulo->id,
-                    'nombre_modulo' => $modulo->codigo_identificador, 
-                    'estado_alerta' => 'Sin Lecturas',
-                ];
+                $estadoAlerta = 'Sin Lecturas'; 
             }
-        }
 
+            // --- CORRECCIONES EN EL ARRAY DE DATOS ---
+            $latestData[] = [
+                'modulo_id' => $modulo->id,
+                'nombre_modulo' => $modulo->codigo_identificador,
+                'cultivo_actual' => $modulo->cultivo_actual, // Siempre incluido
+                // Cast explícito a float/int para asegurar que sean números en el JSON
+                'ph' => $latestReading ? (float)$latestReading->ph : null, 
+                'ec' => $latestReading ? (float)$latestReading->ec : null,
+                'temperatura' => $latestReading ? (float)$latestReading->temperatura : null,
+                'luz' => $latestReading ? (int)$latestReading->luz : null, // Cast a int
+                'estado_alerta' => $estadoAlerta,
+                'minutos_offline' => $tiempoDesdeUltimaLectura, // Nombre correcto
+                'hora_ultima_lectura' => $latestReading ? $ultimaLecturaTimestamp->format('H:i:s') : null 
+            ];
+            // --- FIN CORRECCIONES ---
+        }
         return response()->json($latestData);
     }
 
