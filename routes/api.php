@@ -24,3 +24,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/lecturas', [LecturaSensorController::class, 'store'])->middleware('auth:sanctum');
 
 Route::get('/dashboard/latest-data', [ApiDashboardController::class, 'getLatestModuleData']);
+
+// La URL a la que llama el frontend es: /api/dashboard/history/X
+Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getModuleHistory']);

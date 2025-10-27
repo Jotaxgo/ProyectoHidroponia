@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ViveroController;
 use App\Http\Controllers\Admin\ModuloController;
 use App\Http\Controllers\Admin\ReporteController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\Api\ApiDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +71,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         // NUEVA RUTA PARA DETALLE DEL MÓDULO (Acción "Ver Detalle")
         // Route::get('/admin/modulos/{modulo}/detail', [ModuloController::class, 'showDetail'])->name('admin.modulos.detail');
         Route::get('/modulos/{modulo}/detail', [ModuloController::class, 'showDetail'])->name('admin.modulos.detail');
+
+        // ... Ruta de datos recientes (que ya tienes)
+        Route::get('/dashboard/latest-data', [ApiDashboardController::class, 'getLatestModuleData']);
+
+        // NUEVA RUTA PARA EL HISTORIAL DE GRÁFICOS
+        Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getModuleHistory']);
         
     });
 
