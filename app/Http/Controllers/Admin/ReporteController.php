@@ -11,7 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonPeriod;
+use Carbon\Carbon;
 use App\Models\LecturaSensor;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ReporteController extends Controller
 {
@@ -57,116 +60,134 @@ class ReporteController extends Controller
 
         return view('admin.reportes.module-form', compact('modulos', 'modulosOcupados'));
     }
+
     
 
     /**
-     * Muestra la previsualización del reporte de un módulo.
+     * Muestra la previsualización del reporte de módulo en la web.
      */
     public function showModuleReportPreview(Request $request)
     {
-        // Obtiene el tipo de reporte y el ID del módulo
-        $reportType = $request->input('report_type');
-        $moduloId = $request->input('report_type') === 'cultivo' ? $request->input('modulo_id') : $request->input('modulo_id_custom');
-
-        // Validación inicial
-        $request->validate([
-            'report_type' => 'required|in:custom,cultivo',
+        // --- VALIDACIÓN CORREGIDA ---
+        $validated = $request->validate([
+            'report_type' => 'required|string|in:custom,cultivo',
+            // modulo_id es requerido SI report_type es 'cultivo'
+            'modulo_id' => ['required_if:report_type,cultivo', Rule::exists('modulos', 'id')],
+            // modulo_id_custom es requerido SI report_type es 'custom'
+            'modulo_id_custom' => ['required_if:report_type,custom', Rule::exists('modulos', 'id')],
+            // fecha_inicio es requerido SI report_type es 'custom'
+            'fecha_inicio' => 'required_if:report_type,custom|nullable|date',
+            // fecha_fin es requerido SI report_type es 'custom'
+            'fecha_fin' => 'required_if:report_type,custom|nullable|date|after_or_equal:fecha_inicio',
         ]);
 
-        // Validación condicional dependiendo del tipo de reporte
-        if ($reportType === 'custom') {
-            $request->validate([
-                'modulo_id_custom' => 'required|exists:modulos,id',
-                'fecha_inicio' => 'required|date',
-                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            ]);
-            $fecha_inicio = $request->fecha_inicio;
-            $fecha_fin = $request->fecha_fin;
-        } else { // 'cultivo'
-            $request->validate(['modulo_id' => 'required|exists:modulos,id']);
+        // --- LÓGICA AUTOMÁTICA DE FECHAS ---
+        if ($request->input('report_type') === 'cultivo') {
+            $moduloId = $validated['modulo_id'];
+            $modulo = Modulo::findOrFail($moduloId);
+            // Si falta la fecha de siembra, usamos los últimos 30 días como fallback
+            $fechaInicio = $modulo->fecha_siembra ? Carbon::parse($modulo->fecha_siembra)->startOfDay() : Carbon::now()->subDays(29)->startOfDay();
+            $fechaFin = Carbon::now()->endOfDay(); // Hasta el día de hoy
+        } else {
+            // Usamos las fechas y el módulo_id del rango personalizado
+            $moduloId = $validated['modulo_id_custom'];
+            $modulo = Modulo::findOrFail($moduloId); // Aseguramos que $modulo esté definido
+            $fechaInicio = Carbon::parse($validated['fecha_inicio'])->startOfDay();
+            $fechaFin = Carbon::parse($validated['fecha_fin'])->endOfDay();
+        }
+        // --- FIN LÓGICA AUTOMÁTICA ---
+
+
+        // Obtener módulo y verificar permisos (igual que antes, pero $modulo ya está cargado)
+        $user = Auth::user();
+        $esAdmin = $user->role->nombre_rol === 'Admin';
+        $esDuenoDelModulo = !$esAdmin && $user->id === $modulo->vivero->user_id;
+        if (!$esAdmin && !$esDuenoDelModulo) {
+            abort(403, 'No tienes permiso para ver reportes para este módulo.');
         }
 
-        // Obtiene el módulo con sus relaciones
-        $modulo = Modulo::with('vivero.user')->findOrFail($moduloId);
+        // Obtener datos reales (consulta agregada por hora - igual que antes)
+        $lecturasAgregadas = LecturaSensor::where('modulo_id', $moduloId)
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->select(/* ... campos DB::raw ... */ DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'))
+            ->groupBy('hora_grupo')
+            ->orderBy('hora_grupo', 'asc')
+            ->get();
 
-        // Si el reporte es por cultivo, determina las fechas automáticamente
-        if ($reportType === 'cultivo') {
-            $fecha_inicio = $modulo->fecha_siembra;
-            $fecha_fin = now()->toDateString();
-        }
+        // Preparar datos para la vista (igual que antes)
+        $data = [
+            'modulo' => $modulo,
+            'fechaInicio' => $fechaInicio->isoFormat('D MMMM YYYY'),
+            'fechaFin' => $fechaFin->isoFormat('D MMMM YYYY'),
+            'lecturas' => $lecturasAgregadas,
+            'dueno' => $modulo->vivero->user,
+            'generadoPor' => $user->full_name,
+            'fechaGeneracion' => Carbon::now()->isoFormat('D MMMM YYYY, H:mm'),
+            'request' => $request,
+        ];
 
-        // Genera los datos falsos para el periodo
-        $periodo = CarbonPeriod::create($fecha_inicio, $fecha_fin);
-        $datos = [];
-        foreach ($periodo as $fecha) {
-            $datos[] = [
-                'fecha' => $fecha->format('d/m/Y'),
-                'temperatura' => rand(180, 250) / 10,
-                'ph' => rand(55, 75) / 10,
-                'ec' => rand(12, 25) / 10,
-                'luz' => rand(700, 1200),
-            ];
-        }
-
-        // Retorna la vista de previsualización con todos los datos necesarios
-        return view('admin.reportes.module-report', compact('modulo', 'datos', 'request', 'fecha_inicio', 'fecha_fin'));
+        // Devolver la vista de previsualización
+        return view('admin.reportes.module-report', $data);
     }
 
     /**
-     * Genera y descarga el PDF del reporte de un módulo.
+     * Genera y descarga el reporte PDF para un módulo específico.
      */
     public function generateModuleReport(Request $request)
     {
-        // 1. Validar los filtros
-        $validated = $request->validate([
-            'modulo_id' => 'required|exists:modulos,id',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        // --- VALIDACIÓN CORREGIDA (Igual que en showModuleReportPreview) ---
+         $validated = $request->validate([
+            'report_type' => 'required|string|in:custom,cultivo',
+            'modulo_id' => ['required_if:report_type,cultivo', Rule::exists('modulos', 'id')],
+            'modulo_id_custom' => ['required_if:report_type,custom', Rule::exists('modulos', 'id')],
+            'fecha_inicio' => 'required_if:report_type,custom|nullable|date',
+            'fecha_fin' => 'required_if:report_type,custom|nullable|date|after_or_equal:fecha_inicio',
         ]);
 
-        $moduloId = $validated['modulo_id'];
-        $fechaInicio = $validated['fecha_inicio'];
-        $fechaFin = $validated['fecha_fin'];
-
-        // 2. Obtener la información del módulo
-        $modulo = Modulo::findOrFail($moduloId);
-        $user = Auth::user(); // Obtenemos el usuario autenticado
-
-        // --- INICIO DE LA VERIFICACIÓN DE PERMISOS ---
-        // Verificamos si el usuario es Admin O si es el Dueño de este módulo específico.
-        // Asumimos la relación User -> Vivero -> Modulos
-        $esAdmin = $user->role->nombre_rol === 'Admin';
-        $esDuenoDelModulo = false;
-        if (!$esAdmin && $user->vivero && $user->vivero->id === $modulo->vivero_id) {
-             $esDuenoDelModulo = true;
+        // --- LÓGICA AUTOMÁTICA DE FECHAS (Igual que en showModuleReportPreview) ---
+         if ($request->input('report_type') === 'cultivo') {
+            $moduloId = $validated['modulo_id'];
+            $modulo = Modulo::findOrFail($moduloId);
+            $fechaInicio = $modulo->fecha_siembra ? Carbon::parse($modulo->fecha_siembra)->startOfDay() : Carbon::now()->subDays(29)->startOfDay();
+            $fechaFin = Carbon::now()->endOfDay();
+        } else {
+            $moduloId = $validated['modulo_id_custom'];
+             $modulo = Modulo::findOrFail($moduloId);
+            $fechaInicio = Carbon::parse($validated['fecha_inicio'])->startOfDay();
+            $fechaFin = Carbon::parse($validated['fecha_fin'])->endOfDay();
         }
+        // --- FIN LÓGICA AUTOMÁTICA ---
 
-        // Si NO es Admin Y TAMPOCO es el dueño, denegamos el acceso.
+        // Obtener módulo y verificar permisos (igual que antes)
+        $user = Auth::user();
+        $esAdmin = $user->role->nombre_rol === 'Admin';
+        $esDuenoDelModulo = !$esAdmin && $user->id === $modulo->vivero->user_id;
         if (!$esAdmin && !$esDuenoDelModulo) {
-            // Usamos abort() para detener la ejecución y mostrar un error 403 (Prohibido)
             abort(403, 'No tienes permiso para generar reportes para este módulo.');
         }
-        // --- FIN DE LA VERIFICACIÓN DE PERMISOS ---
 
-
-        // 3. Obtener las lecturas (consulta real que ya teníamos)
-        $lecturas = LecturaSensor::where('modulo_id', $moduloId)
-            ->whereBetween('created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
-            ->orderBy('created_at', 'asc')
+        // Obtener datos reales (consulta agregada por hora - igual que antes)
+        $lecturasAgregadas = LecturaSensor::where('modulo_id', $moduloId)
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+             ->select(/* ... campos DB::raw ... */ DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'))
+            ->groupBy('hora_grupo')
+            ->orderBy('hora_grupo', 'asc')
             ->get();
 
-        // 4. Preparar los datos para la vista PDF
+        // Preparar datos para la vista PDF (igual que antes)
         $data = [
             'modulo' => $modulo,
-            'fechaInicio' => $fechaInicio,
-            'fechaFin' => $fechaFin,
-            'lecturas' => $lecturas,
-            'dueno' => $user->role->nombre_rol !== 'Admin' ? $user : $modulo->vivero->user, // Pasamos el dueño
+            'fechaInicio' => $fechaInicio->isoFormat('D MMMM YYYY'),
+            'fechaFin' => $fechaFin->isoFormat('D MMMM YYYY'),
+            'lecturas' => $lecturasAgregadas,
+            'dueno' => $modulo->vivero->user,
+            'generadoPor' => $user->full_name,
+            'fechaGeneracion' => Carbon::now()->isoFormat('D MMMM YYYY, H:mm'),
         ];
 
-        // 5. Generar y descargar el PDF
-        $pdf = Pdf::loadView('admin.reportes.pdf.modulo_report', $data);
-        $fileName = 'Reporte_Modulo_' . $modulo->codigo_identificador . '_' . $fechaInicio . '_a_' . $fechaFin . '.pdf';
+        // Generar y descargar el PDF
+        $pdf = Pdf::loadView('admin.reportes.module-report-pdf', $data);
+        $fileName = 'Reporte_Horario_' . $modulo->codigo_identificador . '_' . $fechaInicio->format('Ymd') . '-' . $fechaFin->format('Ymd') . '.pdf';
         return $pdf->download($fileName);
     }
 
