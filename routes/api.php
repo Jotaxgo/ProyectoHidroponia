@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LecturaSensorController;
+use App\Http\Controllers\Api\ApiDashboardController;
 
 
 /*
@@ -21,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/lecturas', [LecturaSensorController::class, 'store'])->middleware('auth:sanctum');
+
+Route::get('/dashboard/latest-data', [ApiDashboardController::class, 'getLatestModuleData']);

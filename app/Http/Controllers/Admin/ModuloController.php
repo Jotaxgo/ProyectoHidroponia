@@ -223,4 +223,20 @@ class ModuloController extends Controller
         return redirect()->route('admin.viveros.modulos.index', $vivero)
                         ->with('success', "Cultivo iniciado en el módulo {$modulo->codigo_identificador}.");
     }
+
+    /**
+     * Muestra la vista de detalle y gráficos históricos para un módulo específico.
+     * @param Modulo $modulo
+     * @return \Illuminate\View\View
+     */
+    public function showDetail(Modulo $modulo)
+    {
+        // En este punto, Laravel ya cargó automáticamente el módulo por el ID de la ruta.
+        
+        // Retornamos la vista que crearemos en el siguiente paso,
+        // pasándole el objeto Modulo completo.
+        return view('admin.modulos.detail', [
+            'modulo' => $modulo,
+        ]);
+    }
 }

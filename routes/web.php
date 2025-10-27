@@ -66,6 +66,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         // Recursos (rutas generales)
         Route::resource('users', UserController::class)->except(['show']);
         Route::resource('viveros', ViveroController::class);
+
+        // NUEVA RUTA PARA DETALLE DEL MÓDULO (Acción "Ver Detalle")
+        // Route::get('/admin/modulos/{modulo}/detail', [ModuloController::class, 'showDetail'])->name('admin.modulos.detail');
+        Route::get('/modulos/{modulo}/detail', [ModuloController::class, 'showDetail'])->name('admin.modulos.detail');
+        
     });
 
     // --- RUTAS PARA ADMIN Y DUEÑO DE VIVERO ---

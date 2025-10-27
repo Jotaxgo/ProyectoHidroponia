@@ -26,6 +26,7 @@ class Modulo extends Model
         'hardware_info' => 'array',
     ];
 
+    // 1. RELACIÓN AL VIVERO AL QUE PERTENECE
     public function vivero(): BelongsTo
     {
         return $this->belongsTo(Vivero::class);
@@ -37,5 +38,27 @@ class Modulo extends Model
     public function lecturas(): HasMany
     {
         return $this->hasMany(LecturaSensor::class);
+    }
+
+    // 2. RELACIÓN AL DUEÑO DEL VIVERO
+    // Asumimos que el modelo Vivero tiene un campo 'user_id' o 'dueno_id'
+    public function dueno()
+    {
+        // Esto asume que el modelo Vivero tiene una relación 'user' o 'dueno'
+        // Es una relación de HAS ONE THROUGH si no existe una directa
+        return $this->hasOneThrough(
+            User::class,     // El modelo final que queremos
+            Vivero::class,   // Modelo intermedio
+            'user_id',       // Foreign key en la tabla viveros
+            'id',            // Local key en la tabla users
+            'vivero_id',     // Local key en la tabla modulos
+            'id'             // Foreign key en la tabla users (si tu tabla viveros usa 'user_id' como FK)
+        );
+        
+        /* Si la relación te da problemas, usa la simple a través del vivero:
+        public function dueno() {
+            return $this->vivero->user(); // Asumiendo que Vivero.php tiene una relación 'user()'
+        }
+        */
     }
 }

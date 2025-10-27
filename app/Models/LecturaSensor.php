@@ -21,6 +21,7 @@ class LecturaSensor extends Model
         'luz',
     ];
 
+    
     public function modulo()
     {
         return $this->belongsTo(Modulo::class);
