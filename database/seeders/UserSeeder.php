@@ -39,7 +39,8 @@ class UserSeeder extends Seeder
             Vivero::create([
                 'user_id' => $ownerUser->id,
                 'nombre' => 'Vivero de Juan',
-                'ubicacion' => 'Calle Falsa 123',
+                'latitud' => -17.3895,  // Ejemplo de Latitud
+                'longitud' => -66.1568, // Ejemplo de Longitud
                 'descripcion' => 'Este es el primer vivero de prueba.'
             ]);
         }
