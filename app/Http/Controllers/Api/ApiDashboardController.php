@@ -89,41 +89,31 @@ class ApiDashboardController extends Controller
      * @param Modulo $modulo El módulo extraído automáticamente por Laravel.
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * Devuelve el historial de lecturas (últimas 24h) para un módulo específico.
+     * (CORREGIDO PARA INCLUIR HUMEDAD CORRECTAMENTE)
+     */
     public function getModuleHistory(Modulo $modulo)
     {
-        // Define el rango de tiempo: Desde hace 24 horas hasta ahora
         $last24Hours = Carbon::now()->subHours(24);
 
-        // 1. Obtener los datos de la base de datos
-        $readings = LecturaSensor::where('modulo_id', $modulo->id)
+        $lecturas = LecturaSensor::where('modulo_id', $modulo->id)
             ->where('created_at', '>=', $last24Hours)
             ->orderBy('created_at', 'asc')
-            // Obtener todos los sensores requeridos
-            ->select('ph', 'temperatura', 'ec', 'luz', 'created_at') 
+            // --- ¡ASEGÚRATE DE QUE 'humedad' ESTÉ EN EL SELECT! ---
+            ->select('created_at', 'ph', 'temperatura', 'ec', 'luz', 'humedad') 
             ->get();
 
-        // 2. Formatear los datos para Chart.js
-        $labels = [];       
-        $phData = [];       
-        $tempData = [];     
-        $ecData = [];       // <-- NUEVO: Datos de EC
-        $luzData = [];      // <-- NUEVO: Datos de Luz
+        $data = [
+            'labels' => $lecturas->map(fn($l) => Carbon::parse($l->created_at)->format('H:i')),
+            'ph' => $lecturas->pluck('ph')->map(fn($val) => (float)$val),
+            'temperatura' => $lecturas->pluck('temperatura')->map(fn($val) => (float)$val),
+            'ec' => $lecturas->pluck('ec')->map(fn($val) => (float)$val),
+            'luz' => $lecturas->pluck('luz')->map(fn($val) => (int)$val),
+            // --- ¡ASEGÚRATE DE QUE 'humedad' SE ESTÉ PROCESANDO! ---
+            'humedad' => $lecturas->pluck('humedad')->map(fn($val) => (float)$val),
+        ];
 
-        foreach ($readings as $reading) {
-            $labels[] = $reading->created_at->isoFormat('HH:mm'); 
-            $phData[] = $reading->ph;
-            $tempData[] = $reading->temperatura;
-            $ecData[] = $reading->ec;   // <-- Añadido
-            $luzData[] = $reading->luz; // <-- Añadido
-        }
-
-        // 3. Devolver los cuatro conjuntos de datos formateados
-        return response()->json([
-            'labels' => $labels,
-            'ph' => $phData,
-            'temperatura' => $tempData,
-            'ec' => $ecData, // <-- Añadido
-            'luz' => $luzData, // <-- Añadido
-        ]);
+        return response()->json($data);
     }
 }
