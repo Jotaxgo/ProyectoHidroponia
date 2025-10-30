@@ -20,12 +20,10 @@ class ApiDashboardController extends Controller
 
     /**
      * Devuelve la última lectura de cada módulo de cultivo activo.
-     * ... (código getLatestModuleData anterior)
      */
-    
     public function getLatestModuleData()
     {
-        // 1. Seleccionar siempre 'cultivo_actual'
+        // 1. Seleccionar 'cultivo_actual'
         $modulosActivos = Modulo::where('estado', '!=', 'Disponible')
             ->select('id', 'codigo_identificador', 'cultivo_actual') // Asegurado
             ->get();
@@ -45,36 +43,46 @@ class ApiDashboardController extends Controller
                 $ultimaLecturaTimestamp = Carbon::parse($latestReading->created_at);
                 $tiempoDesdeUltimaLectura = $ultimaLecturaTimestamp->diffInMinutes();
 
+                // Convertimos a float para comparaciones seguras
+                $phVal = (float)$latestReading->ph;
+                $tempVal = (float)$latestReading->temperatura;
+
                 if ($tiempoDesdeUltimaLectura > self::OFFLINE_THRESHOLD_MINUTES) {
                     $estadoAlerta = 'OFFLINE';
-                } elseif (/* ... Crítico ... */ (float)$latestReading->ph < (self::PH_MIN - 0.5) || (float)$latestReading->ph > (self::PH_MAX + 0.5)) { // Cast a float
+                } elseif ($phVal < (self::PH_MIN - 0.5) || $phVal > (self::PH_MAX + 0.5)) {
                     $estadoAlerta = 'CRÍTICO';
-                } elseif (/* ... Advertencia ... */ (float)$latestReading->ph < self::PH_MIN || (float)$latestReading->ph > self::PH_MAX || (float)$latestReading->temperatura > self::TEMP_MAX) { // Cast a float
+                } elseif ($phVal < self::PH_MIN || $phVal > self::PH_MAX || $tempVal > self::TEMP_MAX) {
                     $estadoAlerta = 'ADVERTENCIA';
                 }
             } else {
                 $estadoAlerta = 'Sin Lecturas'; 
             }
 
-            // --- CORRECCIONES EN EL ARRAY DE DATOS ---
+            // --- AÑADIMOS LUZ Y HUMEDAD AL ARRAY ---
             $latestData[] = [
                 'modulo_id' => $modulo->id,
                 'nombre_modulo' => $modulo->codigo_identificador,
-                'cultivo_actual' => $modulo->cultivo_actual, // Siempre incluido
-                // Cast explícito a float/int para asegurar que sean números en el JSON
+                'cultivo_actual' => $modulo->cultivo_actual,
+                
                 'ph' => $latestReading ? (float)$latestReading->ph : null, 
                 'ec' => $latestReading ? (float)$latestReading->ec : null,
                 'temperatura' => $latestReading ? (float)$latestReading->temperatura : null,
-                'luz' => $latestReading ? (int)$latestReading->luz : null, // Cast a int
+                
+                // --- CAMPOS NUEVOS ---
+                'luz' => $latestReading ? (int)$latestReading->luz : null,
+                'humedad' => $latestReading ? (float)$latestReading->humedad : null, // Asumiendo que tienes 'humedad'
+                // --- FIN CAMPOS NUEVOS ---
+                
                 'estado_alerta' => $estadoAlerta,
-                'minutos_offline' => $tiempoDesdeUltimaLectura, // Nombre correcto
+                'minutos_offline' => $tiempoDesdeUltimaLectura,
                 'hora_ultima_lectura' => $latestReading ? $ultimaLecturaTimestamp->format('H:i:s') : null 
             ];
-            // --- FIN CORRECCIONES ---
+            // --- FIN MODIFICACIÓN ---
         }
         return response()->json($latestData);
     }
-
+    
+    
     /**
      * Obtiene el historial de lecturas (últimas 24 horas) para un módulo específico.
      * Devuelve los datos de 4 sensores: PH, Temperatura, EC y Luz.

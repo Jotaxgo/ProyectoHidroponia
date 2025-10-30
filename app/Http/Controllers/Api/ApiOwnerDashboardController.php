@@ -19,39 +19,32 @@ class ApiOwnerDashboardController extends Controller
     private const OFFLINE_THRESHOLD_MINUTES = 10; // Minutos para considerar un módulo "OFFLINE"
 
     /**
-     * Devuelve los datos de los módulos que pertenecen a un VIVERO específico.
+     * Devuelve los datos de los módulos que pertenecen al usuario (dueño) autenticado.
      */
-    // El método ahora recibe el Vivero desde la ruta (Model Binding)
-
     public function getOwnerModuleData(Request $request, Vivero $vivero)
     {
         $user = $request->user();
 
-        // --- Verificación de Seguridad (AHORA DEBERÍA FUNCIONAR) ---
-        // Permitimos el acceso si es el dueño O si es Admin
+        // --- Verificación de Seguridad (OK) ---
         if ($user->id !== $vivero->user_id && $user->role->nombre_rol !== 'Admin') {
-            // Si esto falla, devolverá el 403 original, pero ahora sabemos que los IDs coinciden.
             return response()->json(['message' => 'No autorizado para este vivero.'], 403);
         }
-
-        // --- CÓDIGO ORIGINAL RESTAURADO ---
 
         // 2. Obtenemos los módulos que pertenecen a ESE vivero
         try {
             $modulosDelVivero = $vivero->modulos;
             if ($modulosDelVivero === null) {
-                // Esto puede pasar si la relación modulos() no está definida en el modelo Vivero
-                return response()->json(['message' => 'Relación de módulos no encontrada para este vivero.', 'data' => []], 500);
+                 return response()->json(['message' => 'Relación de módulos no encontrada.', 'data' => []], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al obtener módulos: ' . $e->getMessage(), 'data' => []], 500);
+             return response()->json(['message' => 'Error al obtener módulos: ' . $e->getMessage(), 'data' => []], 500);
         }
-
+        
         $latestData = [];
 
         // 3. Iteramos sobre CADA módulo
         foreach ($modulosDelVivero as $modulo) {
-
+            
             if ($modulo->estado === 'Disponible') {
                 continue; 
             }
@@ -63,43 +56,49 @@ class ApiOwnerDashboardController extends Controller
 
             $estadoAlerta = 'OK';
             $tiempoDesdeUltimaLectura = null;
+            $ultimaLecturaTimestamp = null; // Para cálculo preciso del tiempo
 
             if ($latestReading) {
-                // 5. Calculamos el estado (OK, Crítico, Offline)
-                $tiempoDesdeUltimaLectura = Carbon::parse($latestReading->created_at)->diffInMinutes();
+                $ultimaLecturaTimestamp = Carbon::parse($latestReading->created_at);
+                $tiempoDesdeUltimaLectura = $ultimaLecturaTimestamp->diffInMinutes();
+
+                // Convertimos a float para comparaciones seguras
+                $phVal = (float)$latestReading->ph;
+                $tempVal = (float)$latestReading->temperatura;
 
                 if ($tiempoDesdeUltimaLectura > self::OFFLINE_THRESHOLD_MINUTES) {
                     $estadoAlerta = 'OFFLINE';
-                } elseif ($latestReading->ph < (self::PH_MIN - 0.5) || $latestReading->ph > (self::PH_MAX + 0.5)) {
+                } elseif ($phVal < (self::PH_MIN - 0.5) || $phVal > (self::PH_MAX + 0.5)) {
                     $estadoAlerta = 'CRÍTICO';
-                } elseif ($latestReading->ph < self::PH_MIN || $latestReading->ph > self::PH_MAX || $latestReading->temperatura > self::TEMP_MAX) {
+                } elseif ($phVal < self::PH_MIN || $phVal > self::PH_MAX || $tempVal > self::TEMP_MAX) {
                     $estadoAlerta = 'ADVERTENCIA';
                 }
-
-                // 6. Preparamos los datos
-                $latestData[] = [
-                    'modulo_id' => $modulo->id,
-                    'codigo' => $modulo->codigo_identificador,
-                    'cultivo' => $modulo->cultivo_actual,
-                    'ph' => round($latestReading->ph, 2),
-                    'ec' => round($latestReading->ec, 2),
-                    'temperatura' => round($latestReading->temperatura, 1),
-                    'ultima_lectura' => $latestReading->created_at->format('H:i:s'),
-                    'minutos_offline' => $tiempoDesdeUltimaLectura,
-                    'estado_alerta' => $estadoAlerta,
-                ];
             } else {
-                // Si el módulo está "Ocupado" pero NUNCA ha enviado datos
-                $latestData[] = [
-                    'modulo_id' => $modulo->id,
-                    'codigo' => $modulo->codigo_identificador,
-                    'cultivo' => $modulo->cultivo_actual,
-                    'estado_alerta' => 'OFFLINE',
-                    'minutos_offline' => null,
-                ];
+                $estadoAlerta = 'Sin Lecturas'; 
             }
+
+            // --- AÑADIMOS LUZ Y HUMEDAD AL ARRAY ---
+            $latestData[] = [
+                'modulo_id' => $modulo->id,
+                'codigo' => $modulo->codigo_identificador,
+                'cultivo' => $modulo->cultivo_actual,
+                
+                'ph' => $latestReading ? (float)$latestReading->ph : null, 
+                'ec' => $latestReading ? (float)$latestReading->ec : null,
+                'temperatura' => $latestReading ? (float)$latestReading->temperatura : null,
+                
+                // --- CAMPOS NUEVOS ---
+                'luz' => $latestReading ? (int)$latestReading->luz : null,
+                'humedad' => $latestReading ? (float)$latestReading->humedad : null,
+                // --- FIN CAMPOS NUEVOS ---
+                
+                'estado_alerta' => $estadoAlerta,
+                'minutos_offline' => $tiempoDesdeUltimaLectura,
+                'ultima_lectura' => $latestReading ? $ultimaLecturaTimestamp->format('H:i:s') : null // Nombre corregido
+            ];
+            // --- FIN MODIFICACIÓN ---
         }
-        // 7. Devolvemos el JSON con los datos de los sensores
+        // 7. Devolvemos el JSON
         return response()->json($latestData);
     }
 }

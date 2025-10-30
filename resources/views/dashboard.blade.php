@@ -55,156 +55,156 @@
     </div>
 
     {{-- ========================================================= --}}
-    {{-- BLOQUE DE SCRIPTS PARA TABLA DINÁMICA DE MONITOREO (CORREGIDO) --}}
+    {{-- BLOQUE DE SCRIPTS (MODIFICADO PARA LUZ Y HUMEDAD) --}}
     {{-- ========================================================= --}}
     <script>
-        /**
-         * Retorna las clases de estilo de Tailwind CSS basado en el estado de alerta.
-         */
+        // Declaramos el intervalo en un ámbito superior para poder detenerlo
+        let adminMonitoreoInterval;
+
+        // ... (Funciones getAlertStyles, formatNumber, formatTimeAgo - sin cambios) ...
         function getAlertStyles(estado) {
             estado = estado || 'Sin Lecturas';
             switch (estado) {
-                case 'CRÍTICO': return { text: 'text-white', bg: 'bg-red-600 font-semibold' }; // Añadido font-semibold
-                case 'ADVERTENCIA': return { text: 'text-yellow-900', bg: 'bg-yellow-400 font-semibold' }; // Ajustado color texto
-                case 'OFFLINE': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' }; // Ajustado color texto y fondo
-                case 'Sin Lecturas': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' }; // Igual que Offline
+                case 'CRÍTICO': return { text: 'text-white', bg: 'bg-red-600 font-semibold' };
+                case 'ADVERTENCIA': return { text: 'text-yellow-900', bg: 'bg-yellow-400 font-semibold' };
+                case 'OFFLINE': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
+                case 'Sin Lecturas': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
                 case 'OK': default: return { text: 'text-white', bg: 'bg-green-600 font-semibold' };
             }
         }
-
-        /**
-         * Intenta convertir un valor a número y formatearlo con toFixed.
-         * Devuelve '---' si no es un número válido o es null/undefined.
-         */
         function formatNumber(value, decimals) {
-            if (value === null || typeof value === 'undefined') return '---'; // Manejo explícito de null/undefined
+            if (value === null || typeof value === 'undefined') return '---';
             const numberValue = parseFloat(value);
-            if (!isNaN(numberValue)) {
-                return numberValue.toFixed(decimals);
-            }
-            return '---'; // Si no se puede convertir
+            if (!isNaN(numberValue)) { return numberValue.toFixed(decimals); }
+            return '---';
         }
-
-        /**
-         * Formatea los minutos desde la última lectura en un texto legible.
-         */
         function formatTimeAgo(minutes, lastHour) {
-             if (minutes === null || typeof minutes === 'undefined') {
-                 // Si minutes es null, podría ser 'Sin Lecturas'
-                 return 'Nunca';
-             }
-             if (minutes < 1) {
-                 return 'Hace instantes';
-             }
-             if (minutes < 60) {
-                 return `Hace ${minutes} min`;
-             }
-              if (minutes < 120) { // Menos de 2 horas
-                 return 'Hace 1 hora';
-             }
-             if (minutes < 1440) { // Menos de 24 horas
-                  return `Hace ${Math.floor(minutes / 60)} horas`;
-             }
-             // Si pasaron más de 24h, mostramos la última hora registrada si existe
-             if(lastHour) {
-                 return `Ayer a las ${lastHour}`; // O un formato de fecha más completo
-             }
-             return 'Hace mucho'; // Fallback
+             if (minutes === null || typeof minutes === 'undefined') { return 'Nunca'; }
+             if (minutes < 1) { return 'Hace instantes'; }
+             if (minutes < 60) { return `Hace ${minutes} min`; }
+             if (minutes < 120) { return 'Hace 1 hora'; }
+             if (minutes < 1440) { return `Hace ${Math.floor(minutes / 60)} horas`; }
+             const days = Math.floor(minutes / 1440);
+             return `Hace ${days} día${days > 1 ? 's' : ''}`;
         }
-
-
+        
         /**
-         * Genera el contenido de la tabla de monitoreo.
+         * Genera el contenido de la tabla de monitoreo del Admin.
          */
         function fetchAndRenderAdminTable() {
-        const container = document.getElementById('monitoreo-table-container');
-        const apiUrl = window.location.origin + '/api/dashboard/latest-data';
+            const container = document.getElementById('monitoreo-table-container');
+            if (!container) return; 
+            
+            const apiUrl = window.location.origin + '/admin/dashboard/latest-data'; // Ruta web
 
-        if (container.querySelector('table')) {
-            container.querySelector('tbody').classList.add('opacity-50', 'transition-opacity');
-        } else {
-            container.innerHTML = `<p class="text-gray-400 animate-pulse">Refrescando datos...</p>`;
-        }
-
-        fetch(apiUrl, { headers: { 'Accept': 'application/json' } })
-        .then(response => {
-            if (!response.ok) throw new Error('Error API: ' + response.statusText);
-            return response.json();
-        })
-        .then(data => {
-            if (!Array.isArray(data)) throw new Error('Respuesta API inválida.');
-            if (data.length === 0) {
-                container.innerHTML = `<p class="text-gray-400">No hay módulos ocupados con datos.</p>`;
-                return;
+            if (container.querySelector('table')) {
+                 container.querySelector('tbody').classList.add('opacity-50', 'transition-opacity');
+            } else {
+                container.innerHTML = `<p class="text-gray-400 animate-pulse">Refrescando datos...</p>`;
             }
 
-            let tableHtml = `
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700/50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Módulo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cultivo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">PH</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">EC</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Temp (°C)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Último Reporte</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-            `;
+            fetch(apiUrl, {
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                if (response.status === 419 || response.status === 401) {
+                    clearInterval(adminMonitoreoInterval); 
+                    container.innerHTML = `<p class="text-yellow-400 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
+                    window.location.reload(); 
+                    throw new Error('Sesión expirada.'); 
+                }
+                if (!response.ok) throw new Error('Error API: ' + response.statusText);
+                return response.json(); 
+            })
+            .then(data => {
+                if (!Array.isArray(data)) throw new Error('Respuesta API inválida.');
+                if (data.length === 0) {
+                    container.innerHTML = `<p class="text-gray-400">No hay módulos ocupados con datos.</p>`;
+                    return;
+                }
 
-            data.forEach(item => {
-                const codigoModulo = item.nombre_modulo || `ID:${item.modulo_id}`;
-                // Mostrar "Sin asignar" si cultivo_actual es null o vacío
-                const cultivoActual = item.cultivo_actual || '<span class="italic text-gray-500">Sin asignar</span>'; 
-                const estadoAlerta = item.estado_alerta || 'Sin Lecturas'; 
-                const styles = getAlertStyles(estadoAlerta);
-                const isOfflineOrNoData = estadoAlerta === 'OFFLINE' || estadoAlerta === 'Sin Lecturas';
-
-                // --- CORRECCIÓN TIEMPO: Usar 'minutos_offline' ---
-                const tiempoReporte = formatTimeAgo(item.minutos_offline, item.hora_ultima_lectura);
-
-                const phDisplay = formatNumber(item.ph, 2);
-                const ecDisplay = formatNumber(item.ec, 2);
-                const tempDisplay = formatNumber(item.temperatura, 1);
-
-                tableHtml += `
-                    <tr class="hover:bg-gray-800 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${codigoModulo}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${cultivoActual}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${phDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${ecDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tempDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 rounded-full ${styles.bg} ${styles.text}">
-                                ${estadoAlerta}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${tiempoReporte}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300">
-                            <a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail">Ver Detalle</a>
-                        </td>
-                    </tr>
+                // --- MODIFICACIÓN: AÑADIR NUEVAS CABECERAS ---
+                let tableHtml = `
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700/50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Módulo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cultivo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">PH</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">EC</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Temp (°C)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Luz (lux)</th> {{-- NUEVO --}}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Humedad (%)</th> {{-- NUEVO --}}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Último Reporte</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
                 `;
+                // --- FIN MODIFICACIÓN ---
+
+                data.forEach(item => {
+                    const codigoModulo = item.nombre_modulo || `ID:${item.modulo_id}`;
+                    const cultivoActual = item.cultivo_actual || '<span class="italic text-gray-500">Sin asignar</span>'; 
+                    const estadoAlerta = item.estado_alerta || 'Sin Lecturas'; 
+                    const styles = getAlertStyles(estadoAlerta);
+                    const tiempoReporte = formatTimeAgo(item.minutos_offline, item.hora_ultima_lectura);
+                    const isOfflineOrNoData = estadoAlerta === 'OFFLINE' || estadoAlerta === 'Sin Lecturas';
+
+                    const phDisplay = formatNumber(item.ph, 2);
+                    const ecDisplay = formatNumber(item.ec, 2);
+                    const tempDisplay = formatNumber(item.temperatura, 1);
+                    
+                    // --- MODIFICACIÓN: LEER NUEVOS DATOS ---
+                    const luzDisplay = formatNumber(item.luz, 0); // Leemos 'luz' (0 decimales)
+                    const humedadDisplay = formatNumber(item.humedad, 1); // Leemos 'humedad' (1 decimal)
+                    // --- FIN MODIFICACIÓN ---
+
+                    // --- MODIFICACIÓN: AÑADIR CELDAS A LA FILA ---
+                    tableHtml += `
+                        <tr class="hover:bg-gray-800 transition duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${codigoModulo}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${cultivoActual}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${phDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${ecDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tempDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${luzDisplay}</td> {{-- NUEVO --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${humedadDisplay}</td> {{-- NUEVO --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 rounded-full ${styles.bg} ${styles.text}">
+                                    ${estadoAlerta}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${tiempoReporte}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300">
+                                <a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail">Ver Detalle</a>
+                            </td>
+                        </tr>
+                    `;
+                    // --- FIN MODIFICACIÓN ---
+                }); // Fin forEach
+
+                tableHtml += `</tbody></table>`;
+                container.innerHTML = tableHtml;
+
+            }) // Fin .then(data => ...)
+            .catch(error => {
+                console.error('Error en la obtención de datos (Admin Dashboard):', error);
+                if (error.message !== 'Sesión expirada.') {
+                    container.innerHTML = `<p class="text-red-400">Error al cargar la tabla: ${error.message}.</p>`; 
+                }
             });
-
-            tableHtml += `</tbody></table>`;
-            container.innerHTML = tableHtml;
-
-        })
-        .catch(error => {
-            console.error('Error en la obtención de datos:', error);
-            container.innerHTML = `<p class="text-red-400">Error al cargar la tabla: ${error.message}. Revisa la consola (F12) y la API.</p>`;
-        });
-    }
+        } // Fin fetchAndRenderAdminTable
 
         // Carga inicial y refresco automático
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('monitoreo-table-container')) {
                  fetchAndRenderAdminTable();
-                 setInterval(fetchAndRenderAdminTable, 30000); 
+                 adminMonitoreoInterval = setInterval(fetchAndRenderAdminTable, 30000); 
             }
         });
     </script>

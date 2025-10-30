@@ -19,6 +19,7 @@ class LecturaSensorController extends Controller
             'ph'          => 'nullable|numeric',
             'ec'          => 'nullable|numeric',
             'luz'         => 'nullable|numeric', // <-- CORRECCIÓN AQUÍ
+            'humedad'         => 'nullable|numeric',
         ]);
 
         // 2. Encontrar el módulo que corresponde al device_id
@@ -35,6 +36,7 @@ class LecturaSensorController extends Controller
             'ph'          => $validated['ph'] ?? null,
             'ec'          => $validated['ec'] ?? null,
             'luz'         => $validated['luz'] ?? null,
+            'humedad'         => $validated['humedad'] ?? null,
         ]);
 
         // 5. Devolver una respuesta exitosa

@@ -105,27 +105,45 @@
     </div>
 
     {{-- ====================================================== --}}
-    {{-- SCRIPT PARA LA TABLA DE MONITOREO (MODIFICADO) --}}
+    {{-- SCRIPT PARA LA TABLA DE MONITOREO (MODIFICADO PARA LUZ Y HUMEDAD) --}}
     {{-- ====================================================== --}}
     <script>
-        // Función para obtener los estilos de la alerta (colores)
+        // Declaramos el intervalo en un ámbito superior para poder detenerlo
+        let monitoreoInterval;
+
+        // ... (Funciones getAlertStyles, formatNumber, formatTimeAgo - sin cambios) ...
         function getAlertStyles(estado) {
-            // ... (esta función no cambia) ...
+            estado = estado || 'Sin Lecturas';
             switch (estado) {
-                case 'CRÍTICO': return { text: 'text-white', bg: 'bg-red-600' };
-                case 'ADVERTENCIA': return { text: 'text-gray-900', bg: 'bg-yellow-400' };
-                case 'OFFLINE': return { text: 'text-gray-900', bg: 'bg-gray-400' };
-                default: return { text: 'text-white', bg: 'bg-green-600' }; // Estado 'OK'
+                case 'CRÍTICO': return { text: 'text-white', bg: 'bg-red-600 font-semibold' };
+                case 'ADVERTENCIA': return { text: 'text-yellow-900', bg: 'bg-yellow-400 font-semibold' };
+                case 'OFFLINE': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
+                case 'Sin Lecturas': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
+                case 'OK': default: return { text: 'text-white', bg: 'bg-green-600 font-semibold' };
             }
+        }
+        function formatNumber(value, decimals) {
+            if (value === null || typeof value === 'undefined') return '---';
+            const numberValue = parseFloat(value);
+            if (!isNaN(numberValue)) { return numberValue.toFixed(decimals); }
+            return '---';
+        }
+        function formatTimeAgo(minutes, lastHour) {
+             if (minutes === null || typeof minutes === 'undefined') { return 'Nunca'; }
+             if (minutes < 1) { return 'Hace instantes'; }
+             if (minutes < 60) { return `Hace ${minutes} min`; }
+             if (minutes < 120) { return 'Hace 1 hora'; }
+             if (minutes < 1440) { return `Hace ${Math.floor(minutes / 60)} horas`; }
+             const days = Math.floor(minutes / 1440);
+             return `Hace ${days} día${days > 1 ? 's' : ''}`;
         }
 
         // Función principal para buscar y dibujar la tabla
         function fetchAndRenderOwnerTable() {
             const container = document.getElementById('monitoreo-table-container');
             if (!container) return;
-
+            
             const viveroId = {{ $vivero->id }};
-            // const apiUrl = window.location.origin + `/api/owner/vivero/${viveroId}/latest-data`;
             const apiUrl = window.location.origin + `/admin/vivero/${viveroId}/latest-data`;
 
             if (container.querySelector('table')) {
@@ -134,10 +152,6 @@
                 container.innerHTML = `<p class="text-gray-400 animate-pulse">Refrescando datos...</p>`;
             }
 
-            // ==================================================
-            // === ¡AQUÍ ESTÁ LA CORRECCIÓN! ===
-            // Añadimos las cabeceras 'Accept' y 'X-CSRF-TOKEN'
-            // ==================================================
             fetch(apiUrl, {
                 headers: {
                     'Accept': 'application/json',
@@ -145,29 +159,24 @@
                 }
             })
             .then(response => {
-                // Ahora, si falla la autenticación (401 o 403), lo manejamos
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('No autorizado. Revisa los permisos o inicia sesión.');
+                if (response.status === 419 || response.status === 401) {
+                    clearInterval(monitoreoInterval); 
+                    container.innerHTML = `<p class="text-yellow-400 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
+                    window.location.reload(); 
+                    throw new Error('Sesión expirada.'); 
                 }
-                if (!response.ok) {
-                    throw new Error('Error de conexión con la API: ' + response.statusText);
-                }
-                // Si la respuesta es OK (200), la leemos como JSON
+                if (response.status === 403) throw new Error('No autorizado.');
+                if (!response.ok) throw new Error('Error API: ' + response.statusText);
                 return response.json(); 
             })
             .then(data => {
-                // Si la API devuelve un mensaje de error (como "Vivero no encontrado")
-                if (data.message) {
-                    throw new Error(data.message);
-                }
-
-                // Si el vivero no tiene módulos
+                if (data.message) throw new Error(data.message);
                 if (data.length === 0) {
                     container.innerHTML = `<p class="text-gray-400">Este vivero no tiene módulos activos (en estado 'Ocupado').</p>`;
                     return;
                 }
 
-                // --- Construcción de la tabla HTML ---
+                // --- MODIFICACIÓN: AÑADIR NUEVAS CABECERAS ---
                 let tableHtml = `
                     <table class="min-w-full divide-y divide-gray-700">
                         <thead>
@@ -177,22 +186,30 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">PH</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">EC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Temp (°C)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Luz (lux)</th> {{-- NUEVO --}}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Humedad (%)</th> {{-- NUEVO --}}
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Último Reporte</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700">`;
+                // --- FIN MODIFICACIÓN ---
 
-                // Iteramos sobre los datos recibidos
                 data.forEach(item => {
                     const styles = getAlertStyles(item.estado_alerta);
-                    const isOffline = item.estado_alerta === 'OFFLINE';
+                    const isOffline = item.estado_alerta === 'OFFLINE' || item.estado_alerta === 'Sin Lecturas';
                     
-                    const tiempoReporte = isOffline ? (item.minutos_offline === null ? 'Nunca' : `Hace ${item.minutos_offline}+ min`) : item.ultima_lectura;
-                    const phDisplay = isOffline ? '---' : item.ph;
-                    const ecDisplay = isOffline ? '---' : item.ec;
-                    const tempDisplay = isOffline ? '---' : item.temperatura;
+                    const tiempoReporte = formatTimeAgo(item.minutos_offline, item.ultima_lectura); // Usamos el nombre corregido
+                    const phDisplay = formatNumber(item.ph, 2);
+                    const ecDisplay = formatNumber(item.ec, 2);
+                    const tempDisplay = formatNumber(item.temperatura, 1);
+                    
+                    // --- MODIFICACIÓN: LEER NUEVOS DATOS ---
+                    const luzDisplay = formatNumber(item.luz, 0);
+                    const humedadDisplay = formatNumber(item.humedad, 1);
+                    // --- FIN MODIFICACIÓN ---
 
+                    // --- MODIFICACIÓN: AÑADIR CELDAS A LA FILA ---
                     tableHtml += `
                         <tr class="hover:bg-gray-800 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${item.codigo}</td>
@@ -200,11 +217,14 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${phDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${ecDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tempDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${luzDisplay}</td> {{-- NUEVO --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${humedadDisplay}</td> {{-- NUEVO --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">${item.estado_alerta}</span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${tiempoReporte}</td>
                         </tr>`;
+                    // --- FIN MODIFICACIÓN ---
                 });
 
                 tableHtml += `</tbody></table>`;
@@ -212,17 +232,17 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                // Ahora mostramos el error de autenticación o de conexión
-                container.innerHTML = `<p class="text-red-400">Error al cargar la tabla: ${error.message}</p>`;
+                if (error.message !== 'Sesión expirada.') {
+                    container.innerHTML = `<p class="text-red-400">Error al cargar la tabla: ${error.message}.</p>`;
+                }
             });
         }
 
         // --- Carga inicial y refresco automático ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Asegurarnos de que el script se ejecute solo si el contenedor existe
             if (document.getElementById('monitoreo-table-container')) {
-                fetchAndRenderOwnerTable(); // Cargar al abrir la página
-                setInterval(fetchAndRenderOwnerTable, 30000); // Refrescar cada 30 segundos
+                fetchAndRenderOwnerTable(); 
+                monitoreoInterval = setInterval(fetchAndRenderOwnerTable, 30000); 
             }
         });
     </script>
