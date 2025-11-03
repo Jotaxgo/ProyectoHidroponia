@@ -44,48 +44,40 @@
             class="min-h-screen flex bg-gray-100 dark:bg-gray-900"
         >
             
-            {{-- ============================================= --}}
             {{-- 1. LA BARRA LATERAL (SIDEBAR) --}}
-            {{-- ============================================= --}}
-            
-            <!-- Fondo oscuro para overlay en móvil (cuando se abre) -->
-            {{-- 
-                AÑADIDO: md:hidden para que SÓLO aparezca en móviles
-                z-index (z-20) debe ser menor que el sidebar (z-30)
-            --}}
-            <div 
-                @click="toggleSidebar()" 
-                class="fixed inset-0 z-20 bg-black opacity-50 transition-opacity md:hidden" 
-                x-show="isSidebarOpen" 
-                x-cloak
-            ></div>
-
-            <!-- El Sidebar (Contenido del Menú) -->
             <aside 
-                class="sidebar fixed inset-y-0 left-0 z-30 bg-hydro-card text-hydro-text-light 
+                class="sidebar fixed inset-y-0 left-0 z-20 bg-hydro-card text-hydro-text-light 
                        transform transition-all duration-300 ease-in-out
                        overflow-x-hidden" 
                 x-cloak
             >
-                {{-- Cargamos el menú (navigation.blade.php - que ya está bien) --}}
                 @include('layouts.navigation')
             </aside>
 
-            {{-- ============================================= --}}
             {{-- 2. EL ÁREA DE CONTENIDO PRINCIPAL --}}
-            {{-- ============================================= --}}
             <div 
                 class="main-content flex flex-col flex-1 transition-all duration-300 ease-in-out"
             >
 
                 <!-- Encabezado Superior (Header) -->
-                <header class="bg-white dark:bg-hydro-card shadow-md h-16 flex-shrink-0">
+                {{-- 
+                    ======================================================
+                    MODIFICACIÓN 1: 
+                    Cambiamos h-16 por h-[170px] (150px del logo + 20px de padding)
+                    ======================================================
+                --}}
+                <header class="bg-white dark:bg-hydro-card shadow-md h-[130px] flex-shrink-0">
                     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex justify-between items-center h-16">
+                        {{-- 
+                            ======================================================
+                            MODIFICACIÓN 2: 
+                            Cambiamos h-16 por h-full para que ocupe los 170px
+                            ======================================================
+                        --}}
+                        <div class="flex justify-between items-center h-full">
                             
-                            <!-- Lado Izquierdo: Botón Hamburguesa Y Logo/Nombre -->
+                            <!-- Lado Izquierdo: Botón Hamburguesa -->
                             <div class="flex items-center">
-                                <!-- Botón Hamburguesa -->
                                 <button 
                                     @click="toggleSidebar()" 
                                     class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 transition"
@@ -94,15 +86,25 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
                                 </button>
-                                <!-- Logo y Nombre (Fijos en el Header) -->
-                                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 ml-4">
-                                    <img src="{{ asset('images/mi-logo.png') }}" alt="Logo" class="block h-10 w-auto"> 
-                                    <span class="font-bold text-xl text-white tracking-wider hidden md:block">
+                            </div>
+
+                            <!-- Centro: Logo y Nombre (Centrado) -->
+                            <div class="flex-grow flex justify-center"> 
+                                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+                                    {{-- 
+                                        NO SE TOCA EL TAMAÑO DEL LOGO (h-[150px])
+                                    --}}
+                                    <img src="{{ asset('images/Logo Hidrofrutilla 2.png') }}" alt="Logo" class="block h-[150px] w-auto"> 
+                                    <span class="font-bold text-2xl text-white tracking-wider hidden md:block">
                                         Hidrofrutilla
                                     </span>
                                 </a>
                             </div>
 
+                            {{-- 
+                                Lado Derecho: 
+                                (Eliminado, tal como en tu código)
+                            --}}
                             
                         </div>
                     </div>
