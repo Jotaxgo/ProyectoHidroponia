@@ -61,3 +61,56 @@
     background-color: theme('colors.hydro-card');
     color: theme('colors.hydro-hover');
 }
+
+/* ============================================= */
+/* REGLAS DEL SIDEBAR RESPONSIVO (CORREGIDO) */
+/* ============================================= */
+
+/* 1. ESTADO BASE (MÓVIL, CERRADO) */
+.sidebar {
+    width: 16rem; /* w-64 (Este es su ancho cuando se abra) */
+    transform: translateX(-100%); /* Oculto fuera de la pantalla */
+    /* z-index está en app.blade.php (z-20 o z-30) */
+}
+.main-content {
+    margin-left: 0; /* El contenido ocupa todo el ancho */
+}
+
+/* 2. ESTADO ABIERTO (MÓVIL, html.sidebar-open) */
+/* El sidebar se desliza hacia adentro */
+html.sidebar-open .sidebar {
+    transform: translateX(0);
+}
+/* (En móvil, el main-content no se mueve, el sidebar pasa por encima) */
+
+
+/* 3. ESTADO BASE (ESCRITORIO, md:) */
+@media (min-width: 768px) {
+    .sidebar {
+        width: 5rem; /* w-20 (colapsado) */
+        transform: translateX(0); /* Siempre visible */
+    }
+    .main-content {
+        margin-left: 5rem; /* md:ml-20 (espacio para menú colapsado) */
+    }
+}
+
+/* 4. ESTADO ABIERTO (ESCRITORIO, html.sidebar-open) */
+@media (min-width: 768px) {
+    html.sidebar-open .sidebar {
+        width: 16rem; /* w-64 (expandido) */
+    }
+    html.sidebar-open .main-content {
+        margin-left: 16rem; /* md:ml-64 (espacio para menú expandido) */
+    }
+}
+
+/* =============================================
+   REGLA ANTI-PARPADEO (Anti-Flicker)
+   =============================================
+   Esto oculta los elementos que tienen x-cloak HASTA que Alpine.js
+   esté listo, previniendo el "parpadeo" del texto.
+*/
+[x-cloak] {
+    display: none !important;
+}
