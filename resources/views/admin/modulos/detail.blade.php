@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-hydro-text-light leading-tight">
-            Detalle del Módulo: {{ $modulo->codigo_identificador }}
+        <h2 class="font-semibold text-2xl leading-tight">
+            🔧 Detalle del Módulo: <span class="bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent">{{ $modulo->codigo_identificador }}</span>
         </h2>
     </x-slot>
 
@@ -9,46 +9,46 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             
             <!-- 1. PANEL DE INFORMACIÓN CLAVE -->
-            <div class="bg-hydro-card p-8 rounded-xl shadow-xl">
-                <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
-                    Información General y Propietario
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                <h3 class="text-xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6 border-b border-[#e0e0e0] pb-2">
+                    📋 Información General y Propietario
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-[#555555]">
                     <!-- Columna 1: Módulo y Cultivo -->
                     <div>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Módulo</p>
-                        <p class="text-lg font-bold text-white mb-2">{{ $modulo->codigo_identificador }}</p>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mt-4">Cultivo Actual</p>
-                        <p class="text-lg font-bold text-green-400">{{ $modulo->cultivo_actual ?? 'N/A' }}</p>
+                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">🔧 Módulo</p>
+                        <p class="text-lg font-bold text-[#1a1a1a] mb-2">{{ $modulo->codigo_identificador }}</p>
+                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">🌱 Cultivo Actual</p>
+                        <p class="text-lg font-bold text-[#96d900]">{{ $modulo->cultivo_actual ?? 'N/A' }}</p>
                     </div>
                     <!-- Columna 2: Propietario -->
                     <div>
                         @if ($modulo->vivero && $modulo->vivero->user)
-                            <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Dueño (Cliente)</p>
-                            <p class="text-lg font-bold text-white mb-2">{{ $modulo->vivero->user->full_name }}</p>
-                            <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mt-4">Email de Contacto</p>
-                            <p class="text-lg text-blue-300">{{ $modulo->vivero->user->email }}</p>
+                            <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">👤 Dueño (Cliente)</p>
+                            <p class="text-lg font-bold text-[#1a1a1a] mb-2">{{ $modulo->vivero->user->full_name }}</p>
+                            <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">📧 Email de Contacto</p>
+                            <p class="text-lg text-[#ff4b65]">{{ $modulo->vivero->user->email }}</p>
                         @endif
                     </div>
                     <!-- Columna 3: Estado y Fechas -->
                     <div>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Estado</p>
-                        <p class="text-lg font-bold mb-2 @if($modulo->estado === 'Ocupado') text-yellow-400 @elseif($modulo->estado === 'Disponible') text-green-400 @else text-red-400 @endif">
-                            {{ $modulo->estado }}
+                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">⚙️ Estado</p>
+                        <p class="text-lg font-bold mb-2 inline-flex items-center px-3 py-1 rounded-full @if($modulo->estado === 'Ocupado') bg-amber-400/20 text-amber-700 @elseif($modulo->estado === 'Disponible') bg-[#96d900]/20 text-[#6b9b00] @else bg-red-500/20 text-red-600 @endif">
+                            @if($modulo->estado === 'Ocupado')🌱 @elseif($modulo->estado === 'Disponible')✅ @else🔧 @endif {{ $modulo->estado }}
                         </p>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mt-4">Fecha de Siembra</p>
-                        <p class="text-lg">{{ $modulo->fecha_siembra ? \Carbon\Carbon::parse($modulo->fecha_siembra)->isoFormat('D MMM YYYY') : 'N/A' }}</p>
+                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">📅 Fecha de Siembra</p>
+                        <p class="text-lg text-[#1a1a1a]">{{ $modulo->fecha_siembra ? \Carbon\Carbon::parse($modulo->fecha_siembra)->isoFormat('D MMM YYYY') : 'N/A' }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- 2. SECCIÓN DE GRÁFICOS -->
-            <div class="bg-hydro-card p-8 rounded-xl shadow-xl">
-                <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
-                    Histórico de Parámetros (Actualizado en tiempo real)
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                <h3 class="text-xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6 border-b border-[#e0e0e0] pb-2">
+                    📊 Histórico de Parámetros (Actualizado en tiempo real)
                 </h3>
                 
-                <div id="loading-charts" class="text-center text-gray-400 p-8">Cargando gráficos...</div>
+                <div id="loading-charts" class="text-center text-[#999999] p-8">⏳ Cargando gráficos...</div>
                 
                 {{-- 
                     ======================================================
@@ -57,7 +57,7 @@
                 --}}
                 <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 hidden">
                     {{-- Gráfico 1: pH --}}
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-inner h-96">
+                    <div class="bg-[#fafafa] p-4 rounded-lg shadow-inner h-96 border border-[#e0e0e0]">
                         <h4 class="text-lg font-semibold text-white mb-3">Gráfico de pH del Agua</h4>
                         <canvas id="phChart"></canvas>
                     </div>

@@ -12,8 +12,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const isOpen = (window.innerWidth >= 768) ? true : JSON.parse(localStorage.getItem('isSidebarOpen') || 'false');
-            document.documentElement.classList.toggle('sidebar-open', isOpen);
+            const dockVisible = JSON.parse(localStorage.getItem('dockVisible') || 'true');
+            if (!dockVisible) {
+                document.documentElement.classList.add('dock-hidden');
+            }
         });
     </script>
 
@@ -30,206 +32,443 @@
             --text-muted: #555555;
             --shadow-sm: 0 4px 15px rgba(156, 0, 0, 0.05);
             --shadow-md: 0 10px 30px rgba(156, 0, 0, 0.08);
-            --active-bg: linear-gradient(135deg, var(--strawberry-dark), var(--strawberry));
         }
 
-        .sidebar-glass {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-right: 1px solid var(--border);
-            box-shadow: var(--shadow-md);
-            width: 280px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .header-glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+        body {
+            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
         }
 
-        .page-title {
-            background: var(--active-bg);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
+        .main-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
         }
 
-        /* BOTÓN HAMBURGUESA ANIMADO */
-        .btn-hamburger {
+        /* SIDEBAR - macOS DOCK STYLE */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            top: 100px;
+            width: 90px;
+            background: rgba(250, 250, 250, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(224, 224, 224, 0.5);
+            box-shadow: inset -1px 0 0 rgba(156, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 100;
+        }
+
+        /* Scrollbar personalizado */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(156, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 0, 0, 0.3);
+        }
+
+        .logo-section {
+            display: none;
+        }
+
+        .collapse-btn {
+            display: none;
+        }
+
+        /* NAVEGACIÓN - DOCK STYLE */
+        .sidebar nav {
+            padding: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 0;
+            text-decoration: none;
+            color: var(--text-dark);
+            border-radius: 16px;
+            margin: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap;
             position: relative;
-            width: 3.5rem;
-            height: 3.5rem;
-            border-radius: 9999px;
+            width: 76px;
+            height: auto;
+            background: transparent;
+            min-height: 80px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 75, 101, 0.15);
+            transform: scale(1.1);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(156, 0, 0, 0.25), rgba(255, 75, 101, 0.15));
+            box-shadow: 0 8px 24px rgba(156, 0, 0, 0.15);
+        }
+
+        .sidebar-icon {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--active-bg);
-            color: white;
-            box-shadow: 0 8px 25px rgba(156, 0, 0, 0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
         }
-        .btn-hamburger:hover {
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.2;
+            max-width: 70px;
+            word-break: break-word;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item:hover .nav-label {
+            color: var(--strawberry-dark);
+            font-weight: 700;
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--strawberry);
+            font-weight: 700;
+        }
+
+        /* SEPARADOR VISUAL EN DOCK */
+        .nav-section-divider {
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(156, 0, 0, 0.2), transparent);
+            margin: 4px 0;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(224, 224, 224, 0.4);
+            box-shadow: 0 4px 20px rgba(156, 0, 0, 0.06);
+            height: 100px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: relative;
+            gap: 24px;
+            margin-left: 0;
+        }
+
+        .header-left {
+            flex: 0.5;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--strawberry-dark), var(--strawberry));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title-icon {
+            font-size: 24px;
+            display: inline-block;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-logo {
+            height: 75px;
+            object-fit: contain;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 12px rgba(156, 0, 0, 0.1));
+        }
+
+        .header-logo:hover {
             transform: scale(1.08);
-            box-shadow: 0 12px 30px rgba(156, 0, 0, 0.4);
+            filter: drop-shadow(0 8px 24px rgba(156, 0, 0, 0.15));
         }
-        .btn-hamburger:active {
+
+        .header-right {
+            flex: 0.5;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+        }
+
+        .header-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(156, 0, 0, 0.05);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .header-user-info:hover {
+            background: rgba(156, 0, 0, 0.1);
+        }
+
+        .header-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--strawberry), var(--strawberry-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(156, 0, 0, 0.15);
+        }
+
+        .header-user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .header-user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-user-email {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-user strong {
+            color: var(--text-dark);
+            font-weight: 600;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(156, 0, 0, 0.1);
+            color: var(--strawberry);
+            border: 1px solid rgba(156, 0, 0, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background: rgba(156, 0, 0, 0.15);
+            border-color: rgba(156, 0, 0, 0.3);
+            transform: scale(1.08);
+        }
+
+        .logout-btn:active {
             transform: scale(0.95);
         }
 
-        /* LÍNEAS ANIMADAS */
-        .hamburger-line {
-            position: absolute;
-            height: 0.125rem;
-            width: 1.5rem;
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* SCROLLBAR PERSONALIZADO */
+        .sidebar::-webkit-scrollbar,
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .content-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(156, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .content-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 0, 0, 0.4);
+        }
+
+        /* FOOTER */
+        .footer {
             background: white;
-            border-radius: 9999px;
-            transition: all 300ms;
-        }
-        .hamburger-line:nth-child(1) { top: 18px; }
-        .hamburger-line:nth-child(2) { top: 26px; }
-        .hamburger-line:nth-child(3) { top: 34px; }
-
-        /* ESTADO ABIERTO → X */
-        .open .hamburger-line:nth-child(1) {
-            transform: translateY(8px) rotate(45deg);
-        }
-        .open .hamburger-line:nth-child(2) {
-            opacity: 0;
-            transform: scale(0);
-        }
-        .open .hamburger-line:nth-child(3) {
-            transform: translateY(-8px) rotate(-45deg);
+            border-top: 1px solid var(--border);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-shrink: 0;
         }
 
-        .status-badge {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .logo-img {
-            height: 100px;
-            filter: drop-shadow(0 4px 12px rgba(156, 0, 0, 0.15));
-        }
-
-        .sidebar-overlay {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+        .footer strong {
+            color: var(--strawberry);
+            font-weight: 700;
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-[var(--bg-light)] text-[var(--text-dark)]">
+<body>
 
-    <div 
-        x-data="{ 
-            isMobile: window.innerWidth < 768,
-            isSidebarOpen: (window.innerWidth >= 768) ? true : JSON.parse(localStorage.getItem('isSidebarOpen') || 'false'),
-            toggleSidebar() {
-                this.isSidebarOpen = !this.isSidebarOpen;
-                localStorage.setItem('isSidebarOpen', JSON.stringify(this.isSidebarOpen));
-                document.documentElement.classList.toggle('sidebar-open', this.isSidebarOpen);
-            },
-            handleResize() {
-                this.isMobile = window.innerWidth < 768;
-                if (!this.isMobile) {
-                    this.isSidebarOpen = true;
-                }
-            }
-        }" 
-        x-init="window.addEventListener('resize', handleResize)"
-        class="min-h-screen flex"
-    >
-
-        <!-- OVERLAY MÓVIL -->
-        <div 
-            x-show="isSidebarOpen" 
-            @click="toggleSidebar()" 
-            class="fixed inset-0 z-40 sidebar-overlay md:hidden"
-            x-transition.opacity
-            x-cloak
-        ></div>
-
-        <!-- SIDEBAR -->
-        <aside 
-            id="sidebar-nav"
-            :class="{'-translate-x-full md:translate-x-0': !isSidebarOpen}"
-            class="fixed inset-y-0 left-0 z-50 sidebar-glass transform transition-transform duration-300 ease-in-out overflow-y-auto
-                   md:static md:z-auto"
-            x-cloak
-            aria-label="Navegación principal"
-        >
-            @include('layouts.navigation')
+    <div class="main-layout" x-data="{ dockVisible: JSON.parse(localStorage.getItem('dockVisible') || 'true') }">
+        
+        <!-- SIDEBAR - macOS DOCK -->
+        <aside class="sidebar" x-cloak>
+            <!-- NAVEGACIÓN - DOCK STYLE -->
+            <nav>
+                @include('layouts.navigation')
+            </nav>
         </aside>
 
-        <!-- MAIN CONTENT -->
-        <div class="flex-1 flex flex-col min-h-screen">
-
-            <!-- HEADER CON BOTÓN ANIMADO -->
-            <header class="header-glass h-[140px] sticky top-0 z-40">
-                <div class="max-w-full mx-auto px-6 h-full flex items-center justify-between">
-
-                    <!-- BOTÓN HAMBURGUESA ANIMADO -->
-                    <button 
-                        @click="toggleSidebar()" 
-                        :class="{'open': isSidebarOpen}"
-                        class="btn-hamburger"
-                        aria-label="Alternar navegación"
-                        :aria-expanded="isSidebarOpen.toString()"
-                        aria-controls="sidebar-nav"
-                    >
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                        <span class="hamburger-line"></span>
-                    </button>
-
-                    <!-- LOGO CENTRADO -->
-                    <a href="{{ route('dashboard') }}" class="flex-1 flex justify-center">
-                        <img src="{{ asset('images/Logo Hidrofrutilla 2.png') }}" 
-                             alt="Hidrofrutilla" class="logo-img">
-                    </a>
-
-                    <!-- ESTADO -->
-                    <div class="status-badge flex items-center space-x-2">
-                        <div class="w-3 h-3 rounded-full bg-[var(--leaf-green)] animate-pulse"></div>
-                        <span class="text-sm font-medium text-[var(--text-muted)]">Sistema Activo</span>
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+            
+            <!-- HEADER -->
+            <header class="header">
+                <!-- LEFT: TÍTULO -->
+                <div class="header-left">
+                    <span class="header-title-icon">🌱</span>
+                    <h1 class="header-title">Hidrofrutilla</h1>
+                </div>
+                
+                <!-- CENTER: LOGO -->
+                <a href="{{ route('dashboard') }}" class="header-center">
+                    <img src="{{ asset('images/Logo Hidrofrutilla 2.png') }}" alt="Hidrofrutilla" class="header-logo">
+                </a>
+                
+                <!-- RIGHT: USER INFO + LOGOUT -->
+                <div class="header-right">
+                    <div class="header-user-info">
+                        <div class="header-user-avatar">
+                            {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="header-user-details">
+                            <div class="header-user-name">{{ Auth::user()->name }}</div>
+                            <div class="header-user-email">{{ Auth::user()->email }}</div>
+                        </div>
                     </div>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="logout-btn" title="Cerrar Sesión">
+                            🚪
+                        </button>
+                    </form>
                 </div>
             </header>
 
-            <!-- TÍTULO -->
-            @if (isset($header))
-                <header class="bg-gradient-to-r from-[var(--strawberry-light)] to-white shadow-sm">
-                    <div class="max-w-7xl mx-auto py-6 px-6">
-                        <h2 class="text-3xl font-bold page-title">
-                            {{ $header }}
-                        </h2>
-                    </div>
-                </header>
-            @endif
-
             <!-- CONTENIDO -->
-            <main class="flex-1 p-6 bg-[var(--bg-light)]">
-                <div class="max-w-7xl mx-auto">
+            <div class="content-area">
+                @if (isset($header))
+                    <div class="page-header">
+                        <h2 class="page-title">{{ $header }}</h2>
+                    </div>
+                @endif
+                <div class="content-wrapper">
                     {{ $slot }}
                 </div>
-            </main>
+            </div>
 
             <!-- FOOTER -->
-            <footer class="bg-white/90 backdrop-blur border-t border-[var(--border)] py-5 mt-auto">
-                <div class="max-w-7xl mx-auto px-6 text-center">
-                    <p class="text-sm text-[var(--text-muted)]">
-                        © {{ date('Y') }} <span style="color: var(--strawberry); font-weight: 700;">Hidrofrutilla</span>
-                    </p>
-                </div>
+            <footer class="footer">
+                © {{ date('Y') }} <strong>Hidrofrutilla</strong> - Sistema Hidropónico
             </footer>
+
         </div>
+
     </div>
+
 </body>
 </html>

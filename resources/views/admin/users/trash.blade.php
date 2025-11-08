@@ -1,61 +1,76 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
+        <h2 class="font-semibold text-xl leading-tight">
             Papelera de Usuarios
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg overflow-hidden rounded-2xl p-8" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
 
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Usuarios Eliminados</h2>
-                    <a href="{{ route('admin.users.index') }}" class="text-gray-400 hover:text-white">&larr; Volver a la lista</a>
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent">Usuarios Eliminados</h2>
+                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">
+                        ← Volver
+                    </a>
                 </div>
 
                 @if (session('success'))
-                    <div class="bg-green-500/20 text-green-300 p-4 rounded mb-4">{{ session('success') }}</div>
+                    <div class="bg-[#96d900]/15 text-[#6b9b00] p-4 rounded-lg mb-4 font-medium">✓ {{ session('success') }}</div>
                 @endif
                 @if (session('error'))
-                    <div class="bg-red-500/20 text-red-300 p-4 rounded mb-4">{{ session('error') }}</div>
+                    <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-4 font-medium">✗ {{ session('error') }}</div>
                 @endif
-                <div class="relative overflow-x-auto rounded-lg">
-                    <table class="w-full text-sm text-left text-hydro-text-light">
-                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
+                
+                <div class="relative overflow-x-auto rounded-xl border border-[#e0e0e0]">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]">
                             <tr>
-                                <th scope="col" class="px-6 py-4">Nombre</th>
-                                <th scope="col" class="px-6 py-4">Email</th>
-                                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Nombre</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Email</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-[#1a1a1a]">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-[#e0e0e0]">
                             @forelse ($trashedUsers as $user)
-                            <tr class="border-b border-hydro-dark">
-                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $user->full_name }}</th>
-                                <td class="px-6 py-4">{{ $user->email }}</td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <form action="{{ route('admin.users.restore', $user->id) }}" method="POST" class="inline">
+                            <tr class="hover:bg-[#ffdef0]/30 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff4b65] to-[#9c0000] flex items-center justify-center text-white text-xs font-bold">
+                                            {{ substr($user->full_name ?? 'U', 0, 1) }}
+                                        </div>
+                                        <span class="font-semibold text-[#1a1a1a]">{{ $user->full_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-[#555555]">{{ $user->email }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <form action="{{ route('admin.users.restore', $user->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('PUT')
-                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-light/20 text-hydro-accent-light rounded-md text-xs hover:bg-hydro-accent-light/40 transition">
-                                                Restaurar
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[#e8f5e9] text-[#6b9b00] rounded-lg text-xs font-semibold hover:bg-[#d4edda] transition">
+                                                ↩️ Restaurar
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.users.forceDelete', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('¿ELIMINACIÓN PERMANENTE? Esta acción no se puede deshacer.')">
+                                        <form action="{{ route('admin.users.forceDelete', $user->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('¿ELIMINACIÓN PERMANENTE? Esta acción no se puede deshacer.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">
-                                                Borrar para Siempre
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-200 transition">
+                                                🚫 Borrar Permanente
                                             </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                             @empty
-                            <tr class="border-b border-hydro-dark">
-                                <td colspan="3" class="px-6 py-4 text-center">La papelera está vacía.</td>
+                            <tr>
+                                <td colspan="3" class="px-6 py-8 text-center text-[#999999]">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <span class="text-2xl">✨</span>
+                                        <p>La papelera está vacía.</p>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>

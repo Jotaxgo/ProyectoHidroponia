@@ -23,8 +23,16 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $nombres = ['Juan', 'Marcelo', 'Luis', 'Carlos', 'Ricardo', 'Jose', 'Miguel', 'Pedro', 'Raul', 'Marco'];
+        $nombres_mujer = ['Maria', 'Ana', 'Sofia', 'Laura', 'Isabel', 'Carmen', 'Patricia', 'Lucia', 'Elena', 'Claudia'];
+        $apellidos = ['Mamani', 'Quispe', 'Flores', 'Condori', 'Choque', 'Vargas', 'Rojas', 'Gutiérrez', 'Perez', 'Lopez'];
+
+        $nombre = $this->faker->randomElement(array_merge($nombres, $nombres_mujer));
+
         return [
-            'name' => fake()->name(),
+            'nombres' => $nombre,
+            'primer_apellido' => $this->faker->randomElement($apellidos),
+            'segundo_apellido' => $this->faker->randomElement($apellidos),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

@@ -1,31 +1,32 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
+        <h2 class="font-semibold text-xl leading-tight">
             Gestión de Viveros
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg overflow-hidden rounded-2xl p-8" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
 
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">Lista de Viveros</h2>
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent">Lista de Viveros</h2>
                     <div class="flex items-center space-x-4">
-                        <a href="{{ route('admin.viveros.trash') }}" class="text-gray-400 hover:text-white">Ver Papelera 🗑️</a>
-                        <a href="{{ route('admin.viveros.create') }}" class="inline-flex items-center px-4 py-2 bg-hydro-accent-gold border border-transparent rounded-md font-semibold text-xs text-hydro-dark uppercase tracking-widest hover:opacity-90 transition">
-                            Crear Nuevo Vivero
+                        <a href="{{ route('admin.viveros.trash') }}" class="inline-flex items-center px-4 py-2 text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">
+                            🗑️ Papelera
+                        </a>
+                        <a href="{{ route('admin.viveros.create') }}" class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white rounded-lg font-semibold text-sm hover:shadow-lg transition">
+                            + Nuevo Vivero
                         </a>
                     </div>
                 </div>
 
-
-                <div class="mb-4 p-4 bg-hydro-dark rounded-lg">
+                <div class="mb-6 p-5 bg-[#fafafa] rounded-xl border border-[#e0e0e0]">
                     <form method="GET" action="{{ route('admin.viveros.index') }}">
-                        <label for="filtro-dueño" class="block font-medium text-sm text-hydro-text-light mb-1">Filtrar por Dueño</label>
-                        <div class="flex items-center space-x-4">
+                        <label for="filtro-dueño" class="block font-semibold text-sm text-[#1a1a1a] mb-3">🔍 Filtrar por Dueño</label>
+                        <div class="flex items-center gap-3">
                             <div class="flex-grow">
-                                <select id="filtro-dueño" name="dueño_id" class="block w-full bg-hydro-dark border-hydro-border text-white focus:border-hydro-accent-gold focus:ring-hydro-accent-gold rounded-md shadow-sm">
+                                <select id="filtro-dueño" name="dueño_id" class="block w-full px-4 py-2 bg-white border border-[#e0e0e0] text-[#1a1a1a] rounded-lg focus:outline-none focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0]">
                                     <option value="">Todos los Dueños</option>
                                     @foreach ($dueños as $dueño)
                                         <option value="{{ $dueño->id }}" @if(request('dueño_id') == $dueño->id) selected @endif>
@@ -34,11 +35,11 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="flex-shrink-0 flex items-center space-x-2">
-                                <button type="submit" class="w-full justify-center bg-hydro-accent-gold hover:opacity-90 text-hydro-dark font-bold py-2 px-4 rounded transition">
+                            <div class="flex items-center gap-2">
+                                <button type="submit" class="px-5 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white font-semibold rounded-lg hover:shadow-lg transition text-sm">
                                     Filtrar
                                 </button>
-                                <a href="{{ route('admin.viveros.index') }}" class="w-full text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition">
+                                <a href="{{ route('admin.viveros.index') }}" class="px-5 py-2 bg-[#e0e0e0] text-[#555555] font-semibold rounded-lg hover:bg-[#d0d0d0] transition text-sm">
                                     Limpiar
                                 </a>
                             </div>
@@ -46,54 +47,62 @@
                     </form>
                 </div>
                 
-                <div class="relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-700">
-                    <table class="w-full text-sm text-left text-hydro-text-light">
-                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
+                <div class="relative overflow-x-auto rounded-xl border border-[#e0e0e0]">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]">
                             <tr>
-                                <th scope="col" class="px-6 py-4">Nombre</th>
-                                <th scope="col" class="px-6 py-4">Dueño</th>
-                                <th scope="col" class="px-6 py-4 text-center">Módulos</th>
-                                <th scope="col" class="px-6 py-4 text-center">Acciones</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Nombre</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Dueño</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-[#1a1a1a]">Módulos</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-[#1a1a1a]">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-[#e0e0e0]">
                             @forelse ($viveros as $vivero)
-                            <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
-                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $vivero->nombre }}</th>
-                                <!-- <td class="px-6 py-4">{{ $vivero->ubicacion }}</td> -->
-                                <td class="px-6 py-4">{{ $vivero->user->full_name ?? 'Sin asignar' }}</td>
+                            <tr class="hover:bg-[#ffdef0]/30 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#96d900] to-[#6b9b00] flex items-center justify-center text-white text-xs font-bold">
+                                            🌱
+                                        </div>
+                                        <span class="font-semibold text-[#1a1a1a]">{{ $vivero->nombre }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-[#555555]">{{ $vivero->user->full_name ?? 'Sin asignar' }}</td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="font-bold text-hydro-accent-gold hover:underline">
+                                    <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="font-bold text-[#ff4b65] hover:text-[#9c0000] transition">
                                         {{ $vivero->modulos_count }}
                                     </a>
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <a href="{{ route('admin.viveros.show', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-gray-500/20 text-gray-300 rounded-md text-xs hover:bg-gray-500/40 transition">
-                                            Ver Detalles
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('admin.viveros.show', $vivero) }}" class="inline-flex items-center px-3 py-1.5 bg-[#f0f0f0] text-[#555555] rounded-lg text-xs font-semibold hover:bg-[#e0e0e0] transition">
+                                            👁️ Ver
                                         </a>
-                                        <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-light/20 text-hydro-accent-light rounded-md text-xs hover:bg-hydro-accent-light/40 transition">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                            Módulos
+                                        <a href="{{ route('admin.viveros.modulos.index', $vivero) }}" class="inline-flex items-center px-3 py-1.5 bg-[#e8f5e9] text-[#6b9b00] rounded-lg text-xs font-semibold hover:bg-[#d4edda] transition">
+                                            📦 Módulos
                                         </a>
-                                        <a href="{{ route('admin.viveros.edit', $vivero) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
-                                            Editar
+                                        <a href="{{ route('admin.viveros.edit', $vivero) }}" class="inline-flex items-center px-3 py-1.5 bg-[#ffdef0] text-[#9c0000] rounded-lg text-xs font-semibold hover:bg-[#ffcce0] transition">
+                                            ✏️ Editar
                                         </a>
-                                        <form action="{{ route('admin.viveros.destroy', $vivero) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')">
+                                        <form action="{{ route('admin.viveros.destroy', $vivero) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-                                                Eliminar
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-semibold hover:bg-red-200 transition">
+                                                🗑️ Eliminar
                                             </button>
                                         </form>
                                     </div>
-                                    </td>
+                                </td>
                             </tr>
                             @empty
-                            <tr class="border-b border-hydro-dark">
-                                <td colspan="5" class="px-6 py-4 text-center">No hay viveros registrados.</td>
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-[#999999]">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <span class="text-2xl">📭</span>
+                                        <p>No hay viveros registrados.</p>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>

@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            UserSeeder::class,   // Ahora creamos los usuarios y asignamos el vivero
+            DatosDePruebaSeeder::class,
         ]);
     }
 }

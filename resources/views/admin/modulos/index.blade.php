@@ -11,14 +11,14 @@
             {{-- ====================================================== --}}
             {{-- SECCIÓN 1: TABLA DE MONITOREO EN TIEMPO REAL --}}
             {{-- ====================================================== --}}
-            <div class="bg-hydro-card p-6 rounded-lg shadow-xl overflow-x-auto">
-                <h2 class="text-2xl font-bold text-white mb-4">
-                    Monitoreo en Tiempo Real
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg overflow-hidden rounded-2xl p-8" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">
+                    📊 Monitoreo en Tiempo Real
                 </h2>
                 
                 {{-- Contenedor donde se dibujará la tabla de monitoreo --}}
                 <div id="monitoreo-table-container">
-                    <p class="text-gray-400 animate-pulse">Cargando datos de módulos...</p>
+                    <p class="text-[#999999] animate-pulse">Cargando datos de módulos...</p>
                 </div>
             </div>
 
@@ -26,75 +26,85 @@
             {{-- ====================================================== --}}
             {{-- SECCIÓN 2: GESTIÓN DE MÓDULOS (TU CÓDIGO EXISTENTE) --}}
             {{-- ====================================================== --}}
-            <div class="bg-hydro-card overflow-hidden shadow-xl sm:rounded-lg p-6">
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg overflow-hidden rounded-2xl p-8" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
 
-                {{-- Tu código de "Volver" --}}
-                @if(Auth::user()->role->nombre_rol == 'Admin')
-                    <a href="{{ route('admin.viveros.index') }}" class="text-gray-400 hover:text-white">
-                        &larr; Volver a la Lista de Viveros
-                    </a>
-                @else
-                    <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-white">
-                        &larr; Volver a mi Dashboard
-                    </a>
-                @endif
-
-                {{-- Tu código de cabecera de la tabla de gestión --}}
-                <div class="flex justify-between items-center mb-6 mt-4">
-                    <h2 class="text-2xl font-bold text-white">Lista de Módulos (Gestión)</h2>
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-gray-400 hover:text-white">Ver Papelera 🗑️</a>
-                        <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="inline-flex items-center px-4 py-2 bg-hydro-accent-gold border border-transparent rounded-md font-semibold text-xs text-hydro-dark uppercase tracking-widest hover:opacity-90 transition">
-                            Añadir Nuevo Módulo
+                <div class="flex justify-between items-center mb-8">
+                    <div class="flex flex-col gap-2">
+                        @if(Auth::user()->role->nombre_rol == 'Admin')
+                            <a href="{{ route('admin.viveros.index') }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm inline-block">
+                                ← Volver a Viveros
+                            </a>
+                        @else
+                            <a href="{{ route('dashboard') }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm inline-block">
+                                ← Volver a Dashboard
+                            </a>
+                        @endif
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">🗑️ Papelera</a>
+                        <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white rounded-lg text-xs font-semibold hover:shadow-lg transition">
+                            + Nuevo Módulo
                         </a>
                     </div>
                 </div>
 
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">Gestión de Módulos</h2>
+
                 {{-- Tu tabla de gestión CRUD existente --}}
-                <div class="relative overflow-x-auto rounded-lg">
-                    <table class="w-full text-sm text-left text-hydro-text-light">
-                        <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
+                <div class="relative overflow-x-auto rounded-xl border border-[#e0e0e0]">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]">
                             <tr>
-                                <th scope="col" class="px-6 py-4">Código</th>
-                                <th scope="col" class="px-6 py-4">Device ID</th>
-                                <th scope="col" classs="px-6 py-4">Estado</th>
-                                <th scope="col" class="px-6 py-4 text-right">Acciones</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Código</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Device ID</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Estado</th>
+                                <th scope="col" class="px-6 py-4 text-center font-semibold text-[#1a1a1a]">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-[#e0e0e0]">
                             @forelse ($modulos as $modulo)
-                            <tr class="border-b border-hydro-dark hover:bg-hydro-dark/50">
-                                <th scope="row" class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ $modulo->codigo_identificador }}</th>
-                                <td class="px-6 py-4">{{ $modulo->hardware_info['device_id'] ?? 'N/A' }}</td>
+                            <tr class="hover:bg-[#ffdef0]/30 transition">
                                 <td class="px-6 py-4">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full
-                                        @if($modulo->estado == 'Disponible') bg-green-500/20 text-green-300
-                                        @elseif($modulo->estado == 'Ocupado') bg-yellow-500/20 text-yellow-300
-                                        @else bg-red-500/20 text-red-300 @endif">
-                                        {{ $modulo->estado }}
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-lg">🔧</span>
+                                        <span class="font-semibold text-[#1a1a1a]">{{ $modulo->codigo_identificador }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-[#555555]">{{ $modulo->hardware_info['device_id'] ?? 'N/A' }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                        @if($modulo->estado == 'Disponible') bg-[#96d900]/20 text-[#6b9b00]
+                                        @elseif($modulo->estado == 'Ocupado') bg-amber-400/20 text-amber-700
+                                        @else bg-red-500/20 text-red-600 @endif">
+                                        @if($modulo->estado == 'Disponible')✅ @elseif($modulo->estado == 'Ocupado')🌱 @else🔧 @endif {{ $modulo->estado }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end space-x-2">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center gap-2 flex-wrap">
                                         @if($modulo->estado == 'Disponible')
-                                            <a href="{{ route('admin.viveros.modulos.startCultivoForm', [$vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-bright/80 text-white rounded-md text-xs hover:bg-hydro-accent-bright transition">
-                                                Iniciar Cultivo
+                                            <a href="{{ route('admin.viveros.modulos.startCultivoForm', [$vivero, $modulo]) }}" class="inline-flex items-center px-3 py-1.5 bg-[#96d900]/20 text-[#6b9b00] rounded-lg text-xs font-semibold hover:bg-[#96d900]/30 transition">
+                                                🌱 Iniciar
                                             </a>
                                         @endif
 
-                                        <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="inline-flex items-center px-2.5 py-1.5 bg-hydro-accent-gold/20 text-hydro-accent-gold rounded-md text-xs hover:bg-hydro-accent-gold/40 transition">Editar</a>
+                                        <a href="{{ route('admin.viveros.modulos.edit', [$vivero, $modulo]) }}" class="inline-flex items-center px-3 py-1.5 bg-[#ffdef0] text-[#9c0000] rounded-lg text-xs font-semibold hover:bg-[#ffcce0] transition">✏️ Editar</a>
 
-                                        <form action="{{ route('admin.viveros.modulos.destroy', [$vivero, $modulo]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')">
+                                        <form action="{{ route('admin.viveros.modulos.destroy', [$vivero, $modulo]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?')" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded-md text-xs hover:bg-red-500/40 transition">Eliminar</button>
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500/20 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition">🗑️ Eliminar</button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                             @empty
-                            <tr class="border-b border-hydro-dark">
-                                <td colspan="4" class="px-6 py-4 text-center">Este vivero aún no tiene módulos.</td>
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-[#999999]">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <span class="text-2xl">📭</span>
+                                        <p>Este vivero aún no tiene módulos.</p>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -116,10 +126,10 @@
             estado = estado || 'Sin Lecturas';
             switch (estado) {
                 case 'CRÍTICO': return { text: 'text-white', bg: 'bg-red-600 font-semibold' };
-                case 'ADVERTENCIA': return { text: 'text-yellow-900', bg: 'bg-yellow-400 font-semibold' };
-                case 'OFFLINE': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
-                case 'Sin Lecturas': return { text: 'text-gray-100', bg: 'bg-gray-600 font-semibold' };
-                case 'OK': default: return { text: 'text-white', bg: 'bg-green-600 font-semibold' };
+                case 'ADVERTENCIA': return { text: 'text-amber-900', bg: 'bg-amber-400 font-semibold' };
+                case 'OFFLINE': return { text: 'text-[#999999]', bg: 'bg-[#e0e0e0] font-semibold' };
+                case 'Sin Lecturas': return { text: 'text-[#999999]', bg: 'bg-[#e0e0e0] font-semibold' };
+                case 'OK': default: return { text: 'text-white', bg: 'bg-[#96d900] font-semibold' };
             }
         }
         function formatNumber(value, decimals) {
@@ -172,27 +182,28 @@
             .then(data => {
                 if (data.message) throw new Error(data.message);
                 if (data.length === 0) {
-                    container.innerHTML = `<p class="text-gray-400">Este vivero no tiene módulos activos (en estado 'Ocupado').</p>`;
+                    container.innerHTML = `<p class="text-[#999999]">Este vivero no tiene módulos activos (en estado 'Ocupado').</p>`;
                     return;
                 }
 
                 // --- MODIFICACIÓN: AÑADIR NUEVAS CABECERAS ---
                 let tableHtml = `
-                    <table class="min-w-full divide-y divide-gray-700">
-                        <thead>
+                    <div class="relative overflow-x-auto rounded-xl border border-[#e0e0e0]">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Módulo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cultivo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">PH</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">EC</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Temp (°C)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Luz (lux)</th> {{-- NUEVO --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Humedad (%)</th> {{-- NUEVO --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Último Reporte</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Módulo</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Cultivo</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">PH</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">EC</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Temp (°C)</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Luz (lux)</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Humedad (%)</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Estado</th>
+                                <th class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Último Reporte</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-700">`;
+                        <tbody class="divide-y divide-[#e0e0e0]">`;
                 // --- FIN MODIFICACIÓN ---
 
                 data.forEach(item => {
@@ -211,23 +222,23 @@
 
                     // --- MODIFICACIÓN: AÑADIR CELDAS A LA FILA ---
                     tableHtml += `
-                        <tr class="hover:bg-gray-800 transition duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${item.codigo}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${item.cultivo || 'Sin asignar'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${phDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${ecDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tempDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${luzDisplay}</td> {{-- NUEVO --}}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${humedadDisplay}</td> {{-- NUEVO --}}
+                        <tr class="hover:bg-[#ffdef0]/30 transition">
+                            <td class="px-6 py-4 whitespace-nowrap font-semibold text-[#1a1a1a]">🔧 ${item.codigo}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${item.cultivo || 'Sin asignar'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${phDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${ecDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${tempDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${luzDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#555555]">${humedadDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">${item.estado_alerta}</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${styles.bg} ${styles.text}">${item.estado_alerta}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">${tiempoReporte}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-[#999999]">${tiempoReporte}</td>
                         </tr>`;
                     // --- FIN MODIFICACIÓN ---
                 });
 
-                tableHtml += `</tbody></table>`;
+                tableHtml += `</tbody></table></div>`;
                 container.innerHTML = tableHtml;
             })
             .catch(error => {

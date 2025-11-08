@@ -32,26 +32,26 @@
     Este div envuelve todo el reporte para 
     aplicar los estilos oscuros en la web.
 --}}
-<div class="{{ !$isPdf ? 'bg-hydro-dark border border-gray-700 p-4 md:p-6 rounded-lg' : '' }}">
+<div class="{{ !$isPdf ? 'bg-white/90 backdrop-filter backdrop-blur-lg border border-[#e0e0e0] p-4 md:p-6 rounded-2xl' : '' }}" style="{{ !$isPdf ? 'box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);' : '' }}">
     
     {{-- Información del Reporte (con clases de Tailwind si NO es PDF) --}}
     <div class="report-info {{ !$isPdf ? 'bg-transparent border-0 p-0 mb-6' : '' }}">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm {{ !$isPdf ? 'text-gray-300' : '' }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm {{ !$isPdf ? 'text-[#555555]' : '' }}">
             <div>
-                <strong class="{{ !$isPdf ? 'text-gray-400 font-semibold block uppercase tracking-wider' : '' }}">Módulo:</strong> 
-                <span class="{{ !$isPdf ? 'font-bold text-white text-lg' : '' }}">{{ $modulo->codigo_identificador }} ({{ $modulo->vivero->nombre }})</span>
+                <strong class="{{ !$isPdf ? 'text-[#1a1a1a] font-semibold block uppercase tracking-wider text-xs' : '' }}">🔧 Módulo:</strong> 
+                <span class="{{ !$isPdf ? 'font-bold text-[#1a1a1a] text-lg' : '' }}">{{ $modulo->codigo_identificador }} ({{ $modulo->vivero->nombre }})</span>
             </div>
             <div>
-                <strong class="{{ !$isPdf ? 'text-gray-400 font-semibold block uppercase tracking-wider' : '' }}">Periodo:</strong> 
-                <span class="{{ !$isPdf ? 'text-white text-lg' : '' }}">{{ $fechaInicio }} al {{ $fechaFin }}</span>
+                <strong class="{{ !$isPdf ? 'text-[#1a1a1a] font-semibold block uppercase tracking-wider text-xs' : '' }}">📅 Periodo:</strong> 
+                <span class="{{ !$isPdf ? 'text-[#1a1a1a] text-lg' : '' }}">{{ $fechaInicio }} al {{ $fechaFin }}</span>
             </div>
             <div>
-                <strong class="{{ !$isPdf ? 'text-gray-400 font-semibold block uppercase tracking-wider' : '' }}">Dueño:</strong> 
-                <span class="{{ !$isPdf ? 'text-white text-lg' : '' }}">{{ $dueno->full_name }}</span>
+                <strong class="{{ !$isPdf ? 'text-[#1a1a1a] font-semibold block uppercase tracking-wider text-xs' : '' }}">👤 Dueño:</strong> 
+                <span class="{{ !$isPdf ? 'text-[#1a1a1a] text-lg' : '' }}">{{ $dueno->full_name }}</span>
             </div>
             <div>
-                <strong class="{{ !$isPdf ? 'text-gray-400 font-semibold block uppercase tracking-wider' : '' }}">Generado por:</strong> 
-                <span class="{{ !$isPdf ? 'text-white text-lg' : '' }}">{{ $generadoPor }} ({{ $fechaGeneracion }})</span>
+                <strong class="{{ !$isPdf ? 'text-[#1a1a1a] font-semibold block uppercase tracking-wider text-xs' : '' }}">⚙️ Generado por:</strong> 
+                <span class="{{ !$isPdf ? 'text-[#1a1a1a] text-lg' : '' }}">{{ $generadoPor }} ({{ $fechaGeneracion }})</span>
             </div>
         </div>
     </div>
@@ -63,67 +63,67 @@
         alrededor de la tabla (solo si no es PDF).
         ======================================================
     --}}
-    <div class="relative {{ !$isPdf ? 'overflow-x-auto shadow-md sm:rounded-lg border border-gray-700' : '' }}">
-        <table class="w-full text-sm text-left {{ !$isPdf ? 'text-gray-400' : '' }}">
-            <thead class="{{ !$isPdf ? 'text-xs text-gray-400 uppercase bg-gray-700' : '' }}">
+    <div class="relative {{ !$isPdf ? 'overflow-x-auto rounded-xl border border-[#e0e0e0]' : '' }}">
+        <table class="w-full text-sm text-left {{ !$isPdf ? 'text-[#555555]' : '' }}">
+            <thead class="{{ !$isPdf ? 'text-xs text-[#1a1a1a] uppercase bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]' : '' }}">
                 <tr>
-                    <th rowspan="2" class="px-4 py-3 {{ !$isPdf ? 'border-r border-gray-600 align-bottom' : '' }}">Fecha y Hora</th>
-                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-gray-600' : '' }}">pH</th>
-                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-gray-600' : '' }}">EC (mS/cm)</th>
-                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Temp (°C)</th>
-                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Luz (lux)</th>
-                    <th colspan="3" class="px-4 py-3 text-center">Humedad (%)</th>
+                    <th rowspan="2" class="px-4 py-3 {{ !$isPdf ? 'border-r border-[#e0e0e0] align-bottom font-semibold' : '' }}">Fecha y Hora</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">pH</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">EC (mS/cm)</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Temp (°C)</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Luz (lux)</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'font-semibold' : '' }}">Humedad (%)</th>
                 </tr>
-                <tr class="{{ !$isPdf ? 'text-xs text-gray-400 uppercase bg-gray-700' : '' }}">
+                <tr class="{{ !$isPdf ? 'text-xs text-[#1a1a1a] uppercase bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]' : '' }}">
                     {{-- Sub-cabeceras --}}
-                    <th classa="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Min</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Prom</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Max</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Min</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Prom</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Max</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Min</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Prom</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Max</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Min</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Prom</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Max</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Min</th>
-                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-gray-600' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
                     <th class="px-2 py-2 text-center font-medium">Max</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="{{ !$isPdf ? 'divide-y divide-[#e0e0e0]' : '' }}">
                 @forelse ($lecturas as $lecturaHora)
-                    <tr class="{{ !$isPdf ? 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600' : '' }}">
-                        <td class="{{ !$isPdf ? 'px-4 py-2 font-medium text-gray-300 whitespace-nowrap border-r border-gray-600' : '' }}">
+                    <tr class="{{ !$isPdf ? 'bg-white hover:bg-[#ffdef0]/30 transition' : '' }}">
+                        <td class="{{ !$isPdf ? 'px-4 py-2 font-medium text-[#1a1a1a] whitespace-nowrap border-r border-[#e0e0e0]' : '' }}">
                             {{ \Carbon\Carbon::parse($lecturaHora->hora_grupo)->format('d/m H:00') }}
                         </td>
                         {{-- PH --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->ph_min, 2, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-gray-700 border-r border-gray-600 font-semibold text-white' : '' }}">{{ number_format($lecturaHora->ph_avg, 2, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->ph_max, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ph_min, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->ph_avg, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ph_max, 2, ',', '.') }}</td>
                         {{-- EC --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->ec_min, 2, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-gray-700 border-r border-gray-600 font-semibold text-white' : '' }}">{{ number_format($lecturaHora->ec_avg, 2, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->ec_max, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_min, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->ec_avg, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_max, 2, ',', '.') }}</td>
                         {{-- Temp --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->temperatura_min, 1, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-gray-700 border-r border-gray-600 font-semibold text-white' : '' }}">{{ number_format($lecturaHora->temperatura_avg, 1, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->temperatura_max, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->temperatura_min, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->temperatura_avg, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->temperatura_max, 1, ',', '.') }}</td>
                         {{-- Luz --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->luz_min, 0, '', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-gray-700 border-r border-gray-600 font-semibold text-white' : '' }}">{{ number_format($lecturaHora->luz_avg, 0, '', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->luz_max, 0, '', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->luz_min, 0, '', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->luz_avg, 0, '', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->luz_max, 0, '', '.') }}</td>
                         {{-- Humedad --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-gray-600' : '' }}">{{ number_format($lecturaHora->humedad_min, 1, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-gray-700 border-r border-gray-600 font-semibold text-white' : '' }}">{{ number_format($lecturaHora->humedad_avg, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->humedad_min, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->humedad_avg, 1, ',', '.') }}</td>
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center' : '' }}">{{ number_format($lecturaHora->humedad_max, 1, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="16" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-gray-500' : '' }}">
-                            No se encontraron lecturas registradas para este módulo en el período seleccionado.
+                        <td colspan="16" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-[#999999]' : '' }}">
+                            📭 No se encontraron lecturas registradas para este módulo en el período seleccionado.
                         </td>
                     </tr>
                 @endforelse
