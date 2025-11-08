@@ -12,7 +12,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const isOpen = JSON.parse(localStorage.getItem('isSidebarOpen') || 'true');
+            const isOpen = (window.innerWidth >= 768) ? true : JSON.parse(localStorage.getItem('isSidebarOpen') || 'false');
             document.documentElement.classList.toggle('sidebar-open', isOpen);
         });
     </script>
