@@ -1,12 +1,36 @@
 {{-- resources/views/layouts/navigation.blade.php (NUEVO DISEÑO DE ICONOS) --}}
 
 <div class="flex flex-col h-full text-hydro-text-light">
+
+{{-- 1. Botón de Cerrar (Solo visible si está abierto) --}}
+    {{-- ====================================================== --}}
+    <div 
+        class="h-16 flex-shrink-0 flex items-center justify-end px-4 border-b border-hydro-dark/50"
+        {{-- 
+            Este bloque (y el botón) solo se muestra si el menú está ABIERTO.
+            Cuando está colapsado (solo iconos), no es necesario.
+        --}}
+        x-show="isSidebarOpen" x-transition x-cloak
+    >
+        <button 
+            @click="toggleSidebar()" {{-- Llama a la misma función que el botón hamburguesa --}}
+            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 transition"
+        >
+            <span class="sr-only">Cerrar menú</span>
+            {{-- Icono 'X' para cerrar --}}
+            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+    {{-- ====================================================== --}}
     
     <!-- 1. Enlaces de Navegación (Verticales) -->
     <nav 
         class="flex-1 pt-6 space-y-2 px-3" 
         {{-- CORRECCIÓN: Quitamos el scrollbar para SIEMPRE --}}
         overflow-y-hidden
+        
     >
         
         @php

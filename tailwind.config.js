@@ -1,6 +1,8 @@
+// tailwind.config.js
+
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
-import defaultTheme from 'tailwindcss/defaultTheme';
+// (Eliminada la importación duplicada de defaultTheme)
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -8,34 +10,45 @@ export default {
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        // Asegúrate de que flowbite esté en tu content si lo usas mucho
+        './node_modules/flowbite/**/*.js' 
     ],
 
     theme: {
         extend: {
             fontFamily: {
-                // Define 'sans' para que sea la fuente por defecto de todo el proyecto
+                // Mantenemos tu fuente 'Exo 2'
                 sans: ['"Exo 2"', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                'hydro-dark': '#073B3A',         // Fondo principal muy oscuro
-                'hydro-card': '#0B6E4F',         // Fondo para tarjetas/tablas
-                'hydro-border': '#0B6E4F',
-                'hydro-accent-bright': '#08A045',// Verde vibrante para acentos
-                'hydro-accent-light': '#6BBF59', // Verde claro para hover/iconos
-                'hydro-accent-gold': '#DDB771',  // Dorado para botones principales
-                'hydro-text-light': '#F0F2F5',    // Un blanco suave para texto
-                'hydro-text-dark': '#073B3A',     // Para texto sobre fondos claros
+                // =============================================
+                // ¡AQUÍ ESTÁ TU NUEVA PALETA DE COLORES!
+                // =============================================
+                
+                // Mapeamos los nuevos colores a tus nombres existentes:
+                
+                // Fondos (Reemplazando Verdes Oscuros)
+                'hydro-dark': '#022600',        // (Nuevo: Muy Oscuro)
+                'hydro-card': '#590004',        // (Nuevo: Rojo Oscuro/Maroon para sidebar, cards)
+                'hydro-border': '#590004',      // (Nuevo: Borde igual que la tarjeta)
+
+                // Acentos (Reemplazando Verdes Brillantes y Oro Antiguo)
+                'hydro-accent-bright': '#A50104', // (Nuevo: Rojo Brillante para 'Crítico' o alertas)
+                'hydro-accent-light': '#A50104',  // (Nuevo: Rojo Brillante)
+                'hydro-accent-gold': '#FCBA04',   // (Nuevo: Amarillo/Oro para botones CTA)
+
+                // Texto (Reemplazando Blanco Suave y Verde Oscuro)
+                'hydro-text-light': '#590004',    // (Nuevo: Blanco Suave/Gris Claro)
+                'hydro-text-dark': '#022600',     // (Nuevo: Negro/Oscuro para texto en fondos claros)
+                
+                // Hover (Mantenemos blanco, es un buen contraste)
                 'hydro-hover': '#FFFFFF',
             }
-
-            // fontFamily: {
-            //     sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            // },
         },
     },
 
-    // plugins: [forms],
     plugins: [
-        require('flowbite/plugin')
+        forms, // Mantenemos el plugin de forms si lo usas
+        require('flowbite/plugin') // Mantenemos tu plugin de flowbite
     ],
 };

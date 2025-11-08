@@ -1,7 +1,5 @@
-{{-- resources/views/dashboard.blade.php (SCRIPT CORREGIDO FINAL) --}}
 <x-app-layout>
-    {{-- ... (Tu slot de header y sección de estadísticas - sin cambios) ... --}}
-     <x-slot name="header">
+    <x-slot name="header">
         <h2 class="font-semibold text-xl text-hydro-text-light leading-tight">
             Dashboard del Administrador
         </h2>
@@ -10,43 +8,28 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            {{-- Sección de Estadísticas Generales (Existente) --}}
+            {{-- Sección de Estadísticas (Tu código existente) --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                 {{-- Tarjeta Total Usuarios --}}
                 <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
-                    <div>
-                        <p class="text-sm font-medium text-gray-400">Total de Usuarios</p>
-                        <p class="text-3xl font-bold text-white">{{ $stats['total_users'] }}</p>
-                    </div>
+                    <div><p class="text-sm font-medium text-gray-400">Total de Usuarios</p><p class="text-3xl font-bold text-white">{{ $stats['total_users'] }}</p></div>
                 </div>
-                {{-- Tarjeta Total Viveros --}}
                 <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
-                     <div>
-                        <p class="text-sm font-medium text-gray-400">Total de Viveros</p>
-                        <p class="text-3xl font-bold text-white">{{ $stats['total_viveros'] }}</p>
-                    </div>
+                     <div><p class="text-sm font-medium text-gray-400">Total de Viveros</p><p class="text-3xl font-bold text-white">{{ $stats['total_viveros'] }}</p></div>
                 </div>
-                 {{-- Tarjeta Total Módulos --}}
-                <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
-                    <div>
-                        <p class="text-sm font-medium text-gray-400">Total de Módulos</p>
-                        <p class="text-3xl font-bold text-white">{{ $stats['total_modulos'] }}</p>
-                    </div>
+                 <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
+                    <div><p class="text-sm font-medium text-gray-400">Total de Módulos</p><p class="text-3xl font-bold text-white">{{ $stats['total_modulos'] }}</p></div>
                 </div>
-                 {{-- Tarjeta Módulos Ocupados --}}
-                <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
-                     <div>
-                        <p class="text-sm font-medium text-gray-400">Módulos Ocupados</p>
-                        <p class="text-3xl font-bold text-yellow-400">{{ $stats['modulos_ocupados'] }}</p>
-                    </div>
+                 <div class="bg-hydro-card p-6 rounded-lg shadow-xl">
+                     <div><p class="text-sm font-medium text-gray-400">Módulos Ocupados</p><p class="text-3xl font-bold text-yellow-400">{{ $stats['modulos_ocupados'] }}</p></div>
                 </div>
             </div>
 
-            {{-- SECCIÓN DE MONITOREO DE SENSORES (TABLA RESUMEN) --}}
-            <div class="bg-hydro-card p-6 rounded-lg shadow-xl overflow-x-auto">
+            {{-- SECCIÓN DE MONITOREO DE SENSORES --}}
+            <div class="bg-hydro-card p-6 rounded-lg shadow-xl"> {{-- Contenedor principal --}}
                 <h2 class="text-2xl font-bold text-white mb-4">Estado General de Módulos Ocupados</h2>
-                <div id="monitoreo-table-container">
-                    {{-- Tabla de datos se inyectará aquí --}}
+                
+                {{-- Contenedor con overflow-x-auto para responsividad de la tabla --}}
+                <div id="monitoreo-table-container" class="overflow-x-auto relative">
                     <p class="text-gray-400 animate-pulse">Cargando datos de módulos...</p>
                 </div>
             </div>
@@ -55,13 +38,12 @@
     </div>
 
     {{-- ========================================================= --}}
-    {{-- BLOQUE DE SCRIPTS (MODIFICADO PARA LUZ Y HUMEDAD) --}}
+    {{-- BLOQUE DE SCRIPTS COMPLETO Y CORREGIDO --}}
     {{-- ========================================================= --}}
     <script>
-        // Declaramos el intervalo en un ámbito superior para poder detenerlo
         let adminMonitoreoInterval;
 
-        // ... (Funciones getAlertStyles, formatNumber, formatTimeAgo - sin cambios) ...
+        // Funciones auxiliares (getAlertStyles, formatNumber, formatTimeAgo)
         function getAlertStyles(estado) {
             estado = estado || 'Sin Lecturas';
             switch (estado) {
@@ -110,6 +92,7 @@
                 }
             })
             .then(response => {
+                // Manejo de sesión expirada
                 if (response.status === 419 || response.status === 401) {
                     clearInterval(adminMonitoreoInterval); 
                     container.innerHTML = `<p class="text-yellow-400 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
@@ -126,7 +109,7 @@
                     return;
                 }
 
-                // --- MODIFICACIÓN: AÑADIR NUEVAS CABECERAS ---
+                // Construcción de la tabla HTML (con las 10 columnas)
                 let tableHtml = `
                     <table class="min-w-full divide-y divide-gray-700">
                         <thead class="bg-gray-700/50">
@@ -136,8 +119,8 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">PH</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">EC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Temp (°C)</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Luz (lux)</th> {{-- NUEVO --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Humedad (%)</th> {{-- NUEVO --}}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Luz (lux)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Humedad (%)</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Último Reporte</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
@@ -145,8 +128,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-700">
                 `;
-                // --- FIN MODIFICACIÓN ---
 
+                // Loop para cada fila
                 data.forEach(item => {
                     const codigoModulo = item.nombre_modulo || `ID:${item.modulo_id}`;
                     const cultivoActual = item.cultivo_actual || '<span class="italic text-gray-500">Sin asignar</span>'; 
@@ -158,13 +141,9 @@
                     const phDisplay = formatNumber(item.ph, 2);
                     const ecDisplay = formatNumber(item.ec, 2);
                     const tempDisplay = formatNumber(item.temperatura, 1);
-                    
-                    // --- MODIFICACIÓN: LEER NUEVOS DATOS ---
-                    const luzDisplay = formatNumber(item.luz, 0); // Leemos 'luz' (0 decimales)
-                    const humedadDisplay = formatNumber(item.humedad, 1); // Leemos 'humedad' (1 decimal)
-                    // --- FIN MODIFICACIÓN ---
+                    const luzDisplay = formatNumber(item.luz, 0); 
+                    const humedadDisplay = formatNumber(item.humedad, 1); 
 
-                    // --- MODIFICACIÓN: AÑADIR CELDAS A LA FILA ---
                     tableHtml += `
                         <tr class="hover:bg-gray-800 transition duration-150">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">${codigoModulo}</td>
@@ -172,8 +151,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${phDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${ecDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${tempDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${luzDisplay}</td> {{-- NUEVO --}}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${humedadDisplay}</td> {{-- NUEVO --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${luzDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${humedadDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 rounded-full ${styles.bg} ${styles.text}">
                                     ${estadoAlerta}
@@ -185,20 +164,19 @@
                             </td>
                         </tr>
                     `;
-                    // --- FIN MODIFICACIÓN ---
-                }); // Fin forEach
+                }); // Fin del forEach
 
                 tableHtml += `</tbody></table>`;
                 container.innerHTML = tableHtml;
 
-            }) // Fin .then(data => ...)
+            }) // Fin del .then(data => ...)
             .catch(error => {
                 console.error('Error en la obtención de datos (Admin Dashboard):', error);
                 if (error.message !== 'Sesión expirada.') {
                     container.innerHTML = `<p class="text-red-400">Error al cargar la tabla: ${error.message}.</p>`; 
                 }
             });
-        } // Fin fetchAndRenderAdminTable
+        } // Fin de fetchAndRenderAdminTable
 
         // Carga inicial y refresco automático
         document.addEventListener('DOMContentLoaded', () => {

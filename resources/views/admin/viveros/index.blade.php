@@ -46,7 +46,7 @@
                     </form>
                 </div>
                 
-                <div class="relative overflow-x-auto rounded-lg">
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg border border-gray-700">
                     <table class="w-full text-sm text-left text-hydro-text-light">
                         <thead class="text-xs text-white uppercase bg-hydro-accent-bright/80">
                             <tr>
