@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\LecturaSensorRegistrada;
 use App\Http\Controllers\Controller;
 use App\Models\LecturaSensor;
 use App\Models\Modulo;
@@ -38,6 +39,9 @@ class LecturaSensorController extends Controller
             'luz'         => $validated['luz'] ?? null,
             'humedad'         => $validated['humedad'] ?? null,
         ]);
+
+        // 4.1. Disparar el evento para que los listeners puedan actuar
+        LecturaSensorRegistrada::dispatch($lectura);
 
         // 5. Devolver una respuesta exitosa
         return response()->json([
