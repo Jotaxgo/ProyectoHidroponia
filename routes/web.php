@@ -45,6 +45,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- RUTAS PARA GESTIONAR API TOKENS ---
     Route::post('/profile/tokens', [\App\Http\Controllers\ProfileController::class, 'createToken'])->name('profile.tokens.create');
     Route::delete('/profile/tokens/{tokenId}', [\App\Http\Controllers\ProfileController::class, 'destroyToken'])->name('profile.tokens.destroy');
+
+    // --- RUTAS DE NOTIFICACIONES ---
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
 
 

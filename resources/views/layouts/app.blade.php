@@ -399,6 +399,108 @@
             color: var(--strawberry);
             font-weight: 700;
         }
+        .notification-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 75, 101, 0.1);
+            color: var(--strawberry);
+            border: 1px solid rgba(255, 75, 101, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .notification-btn:hover {
+            background: rgba(255, 75, 101, 0.15);
+            border-color: rgba(255, 75, 101, 0.3);
+            transform: scale(1.08);
+        }
+        .notification-btn:active {
+            transform: scale(0.95);
+        }
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--strawberry-dark);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            min-width: 20px;
+            text-align: center;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .notification-header {
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-header .mark-all-read {
+            font-size: 12px;
+            color: var(--strawberry);
+            text-decoration: none;
+        }
+        .notification-item {
+            display: block;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: background-color 0.2s ease;
+        }
+        .notification-item:hover {
+            background-color: #f9f9f9;
+        }
+        .notification-content {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+        .notification-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .notification-empty {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .notification-footer {
+            padding: 12px 16px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        .notification-footer a {
+            color: var(--strawberry);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -431,6 +533,34 @@
                 
                 <!-- RIGHT: USER INFO + LOGOUT -->
                 <div class="header-right">
+                    <div x-data="{ open: false }" @click.away="open = false" class="relative">
+                        <button @click="open = !open" class="notification-btn">
+                            <span class="text-2xl">🔔</span>
+                            @if($notifications->count() > 0)
+                                <span class="notification-count">{{ $notifications->count() }}</span>
+                            @endif
+                        </button>
+
+                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="notification-dropdown">
+                            <div class="notification-header">
+                                Notificaciones
+                                <a href="{{ route('notifications.markAllAsRead') }}" class="mark-all-read">Marcar todas como leídas</a>
+                            </div>
+                            @forelse($notifications as $notification)
+                                <a href="{{ route('notifications.show', $notification->id) }}" class="notification-item">
+                                    <div class="notification-content">
+                                        {{ $notification->data['messages'][0] ?? 'Nueva alerta' }}
+                                    </div>
+                                    <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="notification-empty">No hay notificaciones nuevas.</div>
+                            @endforelse
+                            <div class="notification-footer">
+                                <a href="{{ route('notifications.index') }}">Ver todas</a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="header-user-info">
                         <div class="header-user-avatar">
                             {{ substr(Auth::user()->name ?? 'U', 0, 1) }}

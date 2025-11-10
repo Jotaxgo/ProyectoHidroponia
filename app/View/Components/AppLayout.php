@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
@@ -12,6 +13,11 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app');
+        $user = Auth::user();
+        $notifications = $user ? $user->unreadNotifications : collect();
+
+        return view('layouts.app', [
+            'notifications' => $notifications
+        ]);
     }
 }
