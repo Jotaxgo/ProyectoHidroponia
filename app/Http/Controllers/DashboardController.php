@@ -45,20 +45,19 @@ class DashboardController extends Controller
 
         } elseif ($userRole == 'Dueño de Vivero') {
             // Lógica para el dashboard del Dueño
-            $viveros = $user->viveros()->withCount('modulos')->get(); // Obtenemos los viveros
-            $viveroIds = $viveros->pluck('id');
-            $modulos = \App\Models\Modulo::whereIn('vivero_id', $viveroIds)->get();
-
+            // Eager-load 'modulos' y 'latestLectura' para tener toda la data en la vista.
+            $viveros = $user->viveros()->with(['modulos.latestLectura'])->withCount('modulos')->get(); 
+            
+            // Las estadísticas globales se mantienen
+            $allModulos = $viveros->flatMap->modulos;
             $stats = [
-                'total' => $modulos->count(),
-                'disponibles' => $modulos->where('estado', 'Disponible')->count(),
-                'ocupados' => $modulos->where('estado', 'Ocupado')->count(),
-                'mantenimiento' => $modulos->where('estado', 'Mantenimiento')->count(),
+                'total' => $allModulos->count(),
+                'disponibles' => $allModulos->where('estado', 'Disponible')->count(),
+                'ocupados' => $allModulos->where('estado', 'Ocupado')->count(),
+                'mantenimiento' => $allModulos->where('estado', 'Mantenimiento')->count(),
             ];
-            $cultivosActivos = $modulos->where('estado', 'Ocupado')->sortBy('fecha_siembra');
+            $cultivosActivos = $allModulos->where('estado', 'Ocupado')->sortBy('fecha_siembra');
 
-            // --- CORRECCIÓN AQUÍ ---
-            // Ahora sí pasamos la variable $viveros a la vista
             return view('owner.dashboard', compact('viveros', 'stats', 'cultivosActivos'));
         }
 

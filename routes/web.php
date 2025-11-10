@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}', [App\Http\Controllers\NotificationController::class, 'show'])->name('notifications.show');
     Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
+    // --- RUTA DE CONTENIDO DINÁMICO PARA DASHBOARD DEL DUEÑO ---
+    Route::get('/owner/dashboard/content', [App\Http\Controllers\Api\ApiOwnerDashboardController::class, 'getDashboardContent'])->name('owner.dashboard.content');
 });
 
 

@@ -40,6 +40,14 @@ class Modulo extends Model
         return $this->hasMany(LecturaSensor::class);
     }
 
+    /**
+     * Define la relación para obtener solo la última lectura de sensor.
+     */
+    public function latestLectura()
+    {
+        return $this->hasOne(LecturaSensor::class)->latestOfMany();
+    }
+
     // 2. RELACIÓN AL DUEÑO DEL VIVERO
     // Asumimos que el modelo Vivero tiene un campo 'user_id' o 'dueno_id'
     public function dueno()

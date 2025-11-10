@@ -12,6 +12,28 @@ use Illuminate\Support\Facades\Auth;
 
 class ApiOwnerDashboardController extends Controller
 {
+    /**
+     * Devuelve el contenido HTML del dashboard del dueño para refresco via AJAX.
+     */
+    public function getDashboardContent(Request $request)
+    {
+        $user = $request->user();
+
+        // La misma lógica que en el DashboardController principal
+        $viveros = $user->viveros()->with(['modulos.latestLectura'])->withCount('modulos')->get(); 
+        
+        $allModulos = $viveros->flatMap->modulos;
+        $stats = [
+            'total' => $allModulos->count(),
+            'disponibles' => $allModulos->where('estado', 'Disponible')->count(),
+            'ocupados' => $allModulos->where('estado', 'Ocupado')->count(),
+            'mantenimiento' => $allModulos->where('estado', 'Mantenimiento')->count(),
+        ];
+        
+        // Devolvemos la vista parcial con los datos frescos
+        return view('owner.partials._dashboard_cards', compact('viveros', 'stats'));
+    }
+
     // --- Constantes para los rangos de alerta ---
     private const PH_MIN = 5.8;
     private const PH_MAX = 6.4;
