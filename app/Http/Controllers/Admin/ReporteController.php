@@ -186,7 +186,7 @@ class ReporteController extends Controller
         ];
 
         // Generar y descargar el PDF
-        $pdf = Pdf::loadView('admin.reportes.module-report-pdf', $data);
+        $pdf = Pdf::loadView('admin.reportes.module-report-pdf', $data)->setPaper('a4', 'landscape');
         $fileName = 'Reporte_Horario_' . $modulo->codigo_identificador . '_' . $fechaInicio->format('Ymd') . '-' . $fechaFin->format('Ymd') . '.pdf';
         return $pdf->download($fileName);
     }

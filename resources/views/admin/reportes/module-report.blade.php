@@ -18,7 +18,7 @@
                 </div>
 
                 <!-- {{-- Incluimos la misma tabla que usa el PDF para no repetir código --}}-->
-                @include('admin.reportes.partials.module-report-table')
+                @include('admin.reportes.partials.module-report-table', ['isPdf' => false])
 
             </div>
         </div>
