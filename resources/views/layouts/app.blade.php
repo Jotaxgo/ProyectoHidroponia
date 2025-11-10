@@ -189,6 +189,7 @@
             justify-content: space-between;
             flex-shrink: 0;
             position: relative;
+            z-index: 30; /* Eleva toda la cabecera por encima del contenido */
             gap: 24px;
             margin-left: 0;
         }
@@ -446,8 +447,9 @@
             border-radius: 12px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border);
-            z-index: 1000;
-            overflow: hidden;
+            z-index: 9999; /* Valor muy alto para asegurar que esté por encima de todo */
+            max-height: 400px; /* Limita la altura */
+            overflow-y: auto; /* Añade scroll si el contenido excede la altura */
         }
         .notification-header {
             padding: 12px 16px;
@@ -501,6 +503,18 @@
             font-weight: 600;
             font-size: 13px;
         }
+        .mark-all-read-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 12px;
+            color: var(--strawberry);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .mark-all-read-btn:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -541,10 +555,13 @@
                             @endif
                         </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="notification-dropdown">
+                        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="notification-dropdown">
                             <div class="notification-header">
                                 Notificaciones
-                                <a href="{{ route('notifications.markAllAsRead') }}" class="mark-all-read">Marcar todas como leídas</a>
+                                <form method="POST" action="{{ route('notifications.markAllAsRead') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="mark-all-read-btn">Marcar todas como leídas</button>
+                                </form>
                             </div>
                             @forelse($notifications as $notification)
                                 <a href="{{ route('notifications.show', $notification->id) }}" class="notification-item">
