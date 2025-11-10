@@ -116,4 +116,20 @@ class ApiDashboardController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Devuelve una lista de todos los módulos con alertas activas.
+     */
+    public function getActiveAlerts()
+    {
+        // Reutilizamos la lógica existente para obtener los datos de todos los módulos.
+        $allModuleData = $this->getLatestModuleData()->getData();
+
+        // Filtramos la colección para quedarnos solo con las alertas.
+        $activeAlerts = collect($allModuleData)->filter(function ($module) {
+            return in_array($module->estado_alerta, ['CRÍTICO', 'ADVERTENCIA', 'OFFLINE', 'Sin Lecturas']);
+        })->values(); // re-indexa el array
+
+        return response()->json($activeAlerts);
+    }
 }

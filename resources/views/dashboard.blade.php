@@ -36,16 +36,30 @@
                 </div>
             </div>
 
-            {{-- SECCIÓN DE MONITOREO DE SENSORES --}}
-            <div class="bg-white/90 backdrop-filter backdrop-blur-lg rounded-2xl p-8 border border-[#e0e0e0]" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
-                <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">📡 Estado General de Módulos Ocupados</h2>
-                
-                {{-- Contenedor con overflow-x-auto para responsividad de la tabla --}}
-                <div id="monitoreo-table-container" class="overflow-x-auto relative">
-                    <p class="text-[#999999] animate-pulse">Cargando datos de módulos...</p>
-                </div>
-            </div>
+            {{-- Contenedor principal para la tabla y el panel de alertas --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+                {{-- Columna principal para la tabla de monitoreo (ocupa 2/3 del espacio) --}}
+                <div class="lg:col-span-2">
+                    <div class="bg-white/90 backdrop-filter backdrop-blur-lg rounded-2xl p-8 border border-[#e0e0e0]" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">📡 Estado General de Módulos Ocupados</h2>
+                        <div id="monitoreo-table-container" class="overflow-x-auto relative">
+                            <p class="text-[#999999] animate-pulse">Cargando datos de módulos...</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Columna lateral para el panel de alertas (ocupa 1/3 del espacio) --}}
+                <div class="lg:col-span-1">
+                    <div class="bg-white/90 backdrop-filter backdrop-blur-lg rounded-2xl p-8 border border-[#e0e0e0]" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">⚠️ Panel de Alertas</h2>
+                        <div id="admin-alerts-panel" class="space-y-3">
+                            <p class="text-[#999999] animate-pulse">Cargando alertas...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -81,6 +95,54 @@
              const days = Math.floor(minutes / 1440);
              return `Hace ${days} día${days > 1 ? 's' : ''}`;
         }
+
+        /**
+         * Genera el contenido del panel de alertas del Admin.
+         */
+        function fetchAndRenderAlertsPanel() {
+            const container = document.getElementById('admin-alerts-panel');
+            if (!container) return;
+
+            const apiUrl = `{{ route('admin.dashboard.activeAlerts') }}`;
+
+            fetch(apiUrl, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }})
+            .then(response => {
+                if (!response.ok) throw new Error('Error API al cargar alertas.');
+                return response.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data)) throw new Error('Respuesta de alertas inválida.');
+                
+                if (data.length === 0) {
+                    container.innerHTML = `<div class="text-center p-4 bg-green-500/10 rounded-lg">
+                        <p class="text-green-700 font-semibold">✅ ¡Todo en orden!</p>
+                        <p class="text-sm text-green-600">No hay alertas activas en el sistema.</p>
+                    </div>`;
+                    return;
+                }
+
+                let alertsHtml = '';
+                data.forEach(item => {
+                    const styles = getAlertStyles(item.estado_alerta);
+                    alertsHtml += `
+                        <a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail" class="block p-3 rounded-lg hover:bg-gray-100 transition">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold text-sm text-[#1a1a1a]">${item.nombre_modulo}</span>
+                                <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">
+                                    ${item.estado_alerta}
+                                </span>
+                            </div>
+                            <p class="text-xs text-[#555555] mt-1">Cultivo: ${item.cultivo_actual || 'N/A'}</p>
+                        </a>
+                    `;
+                });
+                container.innerHTML = alertsHtml;
+            })
+            .catch(error => {
+                console.error('Error en el panel de alertas:', error);
+                container.innerHTML = `<p class="text-red-600 font-semibold text-sm">❌ No se pudo cargar el panel de alertas.</p>`;
+            });
+        }
         
         /**
          * Genera el contenido de la tabla de monitoreo del Admin.
@@ -89,7 +151,7 @@
             const container = document.getElementById('monitoreo-table-container');
             if (!container) return; 
             
-            const apiUrl = window.location.origin + '/admin/dashboard/latest-data'; // Ruta web
+            const apiUrl = `{{ route('admin.dashboard.latest-data') }}`;
 
             if (container.querySelector('table')) {
                  container.querySelector('tbody').classList.add('opacity-50', 'transition-opacity');
@@ -104,7 +166,6 @@
                 }
             })
             .then(response => {
-                // Manejo de sesión expirada
                 if (response.status === 419 || response.status === 401) {
                     clearInterval(adminMonitoreoInterval); 
                     container.innerHTML = `<p class="text-yellow-600 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
@@ -121,7 +182,6 @@
                     return;
                 }
 
-                // Construcción de la tabla HTML (con las 10 columnas)
                 let tableHtml = `
                     <table class="min-w-full divide-y divide-[#e0e0e0]">
                         <thead class="bg-gradient-to-r from-[#9c0000] to-[#ff4b65]">
@@ -141,7 +201,6 @@
                         <tbody class="divide-y divide-[#e0e0e0]">
                 `;
 
-                // Loop para cada fila
                 data.forEach(item => {
                     const codigoModulo = item.nombre_modulo || `ID:${item.modulo_id}`;
                     const cultivoActual = item.cultivo_actual || '<span class="italic text-[#999999]">Sin asignar</span>'; 
@@ -176,25 +235,29 @@
                             </td>
                         </tr>
                     `;
-                }); // Fin del forEach
+                });
 
                 tableHtml += `</tbody></table>`;
                 container.innerHTML = tableHtml;
 
-            }) // Fin del .then(data => ...)
+            })
             .catch(error => {
                 console.error('Error en la obtención de datos (Admin Dashboard):', error);
                 if (error.message !== 'Sesión expirada.') {
                     container.innerHTML = `<p class="text-red-600 font-semibold">❌ Error al cargar la tabla: ${error.message}.</p>`; 
                 }
             });
-        } // Fin de fetchAndRenderAdminTable
+        }
 
         // Carga inicial y refresco automático
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('monitoreo-table-container')) {
                  fetchAndRenderAdminTable();
-                 adminMonitoreoInterval = setInterval(fetchAndRenderAdminTable, 30000); 
+                 fetchAndRenderAlertsPanel(); // <-- Llamada a la nueva función
+                 adminMonitoreoInterval = setInterval(() => {
+                    fetchAndRenderAdminTable();
+                    fetchAndRenderAlertsPanel();
+                 }, 30000); 
             }
         });
     </script>

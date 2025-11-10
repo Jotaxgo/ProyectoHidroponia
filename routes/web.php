@@ -81,7 +81,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::get('/modulos/{modulo}/detail', [ModuloController::class, 'showDetail'])->name('admin.modulos.detail');
 
         // ... Ruta de datos recientes (que ya tienes)
-        Route::get('/dashboard/latest-data', [ApiDashboardController::class, 'getLatestModuleData']);
+        Route::get('/dashboard/latest-data', [ApiDashboardController::class, 'getLatestModuleData'])->name('dashboard.latest-data');
+
+        // NUEVA RUTA PARA EL PANEL DE ALERTAS
+        Route::get('/dashboard/active-alerts', [ApiDashboardController::class, 'getActiveAlerts'])->name('dashboard.activeAlerts');
 
         // NUEVA RUTA PARA EL HISTORIAL DE GRÁFICOS
         Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getModuleHistory']);
