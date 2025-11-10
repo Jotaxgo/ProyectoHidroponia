@@ -25,20 +25,22 @@ class NotificationController extends Controller
     /**
      * Display the specified resource and mark it as read.
      */
-    public function show(Request $request, string $id)
+    public function show(string $id)
     {
         $user = Auth::user();
         $notification = $user->notifications()->findOrFail($id);
 
         $notification->markAsRead();
 
-        if ($request->wantsJson()) {
+        if (request()->wantsJson()) {
             return response()->json(['status' => 'success']);
         }
 
-        // Redirect to the notifications index page with a fragment to scroll to the specific notification.
-        return redirect()->route('notifications.index', ['_fragment' => 'notification-' . $notification->id])
-            ->with('status', 'Notificación marcada como leída.');
+        // Flash the specific notification data and its ID to the session to be displayed once.
+        return redirect()->route('notifications.index')
+            ->with('status', 'Notificación marcada como leída.')
+            ->with('highlighted_notification', $notification->data)
+            ->with('highlighted_id', $notification->id);
     }
 
     /**

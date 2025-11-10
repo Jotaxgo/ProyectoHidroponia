@@ -4,6 +4,13 @@
     </x-slot>
 
     <style>
+        .highlighted-box {
+            background-color: #ffdef0; /* --strawberry-light */
+            border: 1px solid #ff4b65; /* --strawberry */
+            border-left: 5px solid #9c0000; /* --strawberry-dark */
+            padding: 1rem;
+            border-radius: 8px;
+        }
         .notification-target {
             transition: background-color 0.5s ease;
         }
@@ -17,15 +24,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900" x-data x-init="
-                    if (window.location.hash) {
-                        const targetId = window.location.hash.substring(1);
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                            targetElement.classList.add('is-highlighted');
-                        }
-                    }
-                ">
+                <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Tus Notificaciones</h3>
 
                     @if (session('status'))
@@ -35,7 +34,11 @@
                     @endif
 
                     @forelse ($notifications as $notification)
-                        <div id="notification-{{ $notification->id }}" class="notification-target border-b border-gray-200 py-4 {{ $notification->read_at ? 'bg-gray-50' : 'bg-white' }}">
+                        @php
+                            $isHighlighted = session('highlighted_id') && session('highlighted_id') == $notification->id;
+                        @endphp
+                        <div id="notification-{{ $notification->id }}" 
+                             class="notification-target border-b border-gray-200 py-4 {{ $notification->read_at ? 'bg-gray-50' : 'bg-white' }} {{ $isHighlighted ? 'is-highlighted' : '' }}">
                             <div class="flex justify-between items-center">
                                 <div>
                                     <p class="text-sm {{ $notification->read_at ? 'text-gray-500' : 'font-semibold text-gray-800' }}">
