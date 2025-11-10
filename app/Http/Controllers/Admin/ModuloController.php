@@ -231,12 +231,17 @@ class ModuloController extends Controller
      */
     public function showDetail(Modulo $modulo)
     {
-        // En este punto, Laravel ya cargó automáticamente el módulo por el ID de la ruta.
+        // Obtenemos la última lectura de este módulo para el panel de estado actual
+        $latestLectura = $modulo->lecturas()->latest()->first();
+
+        // Obtenemos los límites ideales desde el archivo de configuración
+        $limits = config('hydroponics.limits');
         
-        // Retornamos la vista que crearemos en el siguiente paso,
-        // pasándole el objeto Modulo completo.
+        // Retornamos la vista, pasándole toda la información necesaria.
         return view('admin.modulos.detail', [
             'modulo' => $modulo,
+            'latestLectura' => $latestLectura,
+            'limits' => $limits,
         ]);
     }
 }

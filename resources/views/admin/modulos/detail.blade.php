@@ -1,3 +1,20 @@
+@php
+function getStatusColor($value, $min, $max) {
+    $value = (float)$value;
+    $min = (float)$min;
+    $max = (float)$max;
+    $warningThreshold = ($max - $min) * 0.1; // 10% de margen para advertencia
+
+    if ($value < $min - $warningThreshold || $value > $max + $warningThreshold) {
+        return 'red'; // Crítico
+    }
+    if ($value < $min || $value > $max) {
+        return 'amber'; // Advertencia
+    }
+    return 'green'; // OK
+}
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl leading-tight">
@@ -5,122 +22,196 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ tab: 'status' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             
-            <!-- 1. PANEL DE INFORMACIÓN CLAVE -->
-            <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
-                <h3 class="text-xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6 border-b border-[#e0e0e0] pb-2">
-                    📋 Información General y Propietario
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-[#555555]">
-                    <!-- Columna 1: Módulo y Cultivo -->
-                    <div>
-                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">🔧 Módulo</p>
-                        <p class="text-lg font-bold text-[#1a1a1a] mb-2">{{ $modulo->codigo_identificador }}</p>
-                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">🌱 Cultivo Actual</p>
-                        <p class="text-lg font-bold text-[#96d900]">{{ $modulo->cultivo_actual ?? 'N/A' }}</p>
+            {{-- PESTAÑAS DE NAVEGACIÓN --}}
+            <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-2 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                <div class="flex space-x-2">
+                    <button @click="tab = 'status'" :class="{ 'bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white shadow-md': tab === 'status', 'text-[#555555] hover:bg-gray-200/50': tab !== 'status' }" class="w-full text-center font-semibold py-3 px-4 rounded-xl transition-all duration-300">
+                        Estado Actual
+                    </button>
+                    <button @click="tab = 'graphs'" :class="{ 'bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white shadow-md': tab === 'graphs', 'text-[#555555] hover:bg-gray-200/50': tab !== 'graphs' }" class="w-full text-center font-semibold py-3 px-4 rounded-xl transition-all duration-300">
+                        Gráficos Históricos
+                    </button>
+                </div>
+            </div>
+
+            {{-- VISTA: ESTADO ACTUAL --}}
+            <div x-show="tab === 'status'" x-transition>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {{-- Columna de Información General --}}
+                    <div class="lg:col-span-1 space-y-8">
+                        <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-6 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                            <h3 class="text-lg font-bold text-[#1a1a1a] mb-4">📋 Información</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-[#555555]">Cultivo:</span>
+                                    <span class="font-semibold text-[#1a1a1a]">{{ $modulo->cultivo_actual ?? 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[#555555]">Siembra:</span>
+                                    <span class="font-semibold text-[#1a1a1a]">{{ $modulo->fecha_siembra ? \Carbon\Carbon::parse($modulo->fecha_siembra)->isoFormat('D MMM YYYY') : 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[#555555]">Estado:</span>
+                                    <span class="font-semibold px-2 py-0.5 rounded-full text-xs @if($modulo->estado === 'Ocupado') bg-amber-400/20 text-amber-700 @elseif($modulo->estado === 'Disponible') bg-green-500/20 text-green-700 @else bg-red-500/20 text-red-600 @endif">{{ $modulo->estado }}</span>
+                                </div>
+                                @if ($modulo->vivero && $modulo->vivero->user)
+                                <div class="pt-3 border-t border-gray-200">
+                                    <div class="flex justify-between">
+                                        <span class="text-[#555555]">Dueño:</span>
+                                        <span class="font-semibold text-[#1a1a1a]">{{ $modulo->vivero->user->full_name }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-[#555555]">Email:</span>
+                                        <span class="font-semibold text-[#ff4b65]">{{ $modulo->vivero->user->email }}</span>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <!-- Columna 2: Propietario -->
-                    <div>
-                        @if ($modulo->vivero && $modulo->vivero->user)
-                            <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">👤 Dueño (Cliente)</p>
-                            <p class="text-lg font-bold text-[#1a1a1a] mb-2">{{ $modulo->vivero->user->full_name }}</p>
-                            <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">📧 Email de Contacto</p>
-                            <p class="text-lg text-[#ff4b65]">{{ $modulo->vivero->user->email }}</p>
-                        @endif
-                    </div>
-                    <!-- Columna 3: Estado y Fechas -->
-                    <div>
-                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider">⚙️ Estado</p>
-                        <p class="text-lg font-bold mb-2 inline-flex items-center px-3 py-1 rounded-full @if($modulo->estado === 'Ocupado') bg-amber-400/20 text-amber-700 @elseif($modulo->estado === 'Disponible') bg-[#96d900]/20 text-[#6b9b00] @else bg-red-500/20 text-red-600 @endif">
-                            @if($modulo->estado === 'Ocupado')🌱 @elseif($modulo->estado === 'Disponible')✅ @else🔧 @endif {{ $modulo->estado }}
-                        </p>
-                        <p class="text-sm font-semibold text-[#999999] uppercase tracking-wider mt-4">📅 Fecha de Siembra</p>
-                        <p class="text-lg text-[#1a1a1a]">{{ $modulo->fecha_siembra ? \Carbon\Carbon::parse($modulo->fecha_siembra)->isoFormat('D MMM YYYY') : 'N/A' }}</p>
+
+                    {{-- Columna de Medidores de Estado --}}
+                    <div class="lg:col-span-2">
+                        <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-6 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                            <h3 class="text-lg font-bold text-[#1a1a1a] mb-4">🌡️ Parámetros Actuales</h3>
+                            @if($latestLectura)
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @foreach(['ph' => 'pH', 'temperatura' => '°C', 'ec' => 'EC', 'humedad' => '%', 'luz' => 'lux'] as $key => $unit)
+                                        @php
+                                            $value = (float)$latestLectura->$key;
+                                            $hasLimits = isset($limits[$key]['min']) && isset($limits[$key]['max']);
+                                            
+                                            $statusColor = 'neutral';
+                                            if ($hasLimits) {
+                                                $statusColor = getStatusColor($value, $limits[$key]['min'], $limits[$key]['max']);
+                                            }
+
+                                            $colorClasses = [
+                                                'red' => ['text' => 'text-red-600', 'bg' => 'bg-red-500/20', 'border' => 'border-red-500'],
+                                                'amber' => ['text' => 'text-amber-600', 'bg' => 'bg-amber-500/20', 'border' => 'border-amber-500'],
+                                                'green' => ['text' => 'text-green-600', 'bg' => 'bg-green-500/20', 'border' => 'border-green-500'],
+                                                'neutral' => ['text' => 'text-gray-600', 'bg' => 'bg-gray-100', 'border' => 'border-gray-200'],
+                                            ][$statusColor];
+                                        @endphp
+                                        <div class="p-4 rounded-xl {{ $colorClasses['bg'] }} border {{ $colorClasses['border'] }}">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-bold {{ $colorClasses['text'] }}">{{ strtoupper($key) }}</span>
+                                                <div class="text-right">
+                                                    <p class="text-2xl font-bold {{ $colorClasses['text'] }}">{{ number_format($value, ($key === 'ph' || $key === 'ec' || $key === 'temperatura' || $key === 'humedad') ? 2 : 0) }} <span class="text-lg">{{ $unit }}</span></p>
+                                                    @if($hasLimits)
+                                                        <p class="text-xs font-semibold {{ $colorClasses['text'] }} opacity-80">Ideal: {{ $limits[$key]['min'] }} - {{ $limits[$key]['max'] }}</p>
+                                                    @else
+                                                        <p class="text-xs font-semibold text-gray-500 opacity-80">Sin rango ideal definido</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-400 mt-4 text-right">Última lectura: {{ $latestLectura->created_at->diffForHumans() }}</p>
+                            @else
+                                <p class="text-center text-gray-500 py-8">No hay lecturas recientes para este módulo.</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. SECCIÓN DE GRÁFICOS -->
-            <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
-                <h3 class="text-xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6 border-b border-[#e0e0e0] pb-2">
-                    📊 Histórico de Parámetros (Actualizado en tiempo real)
-                </h3>
-                
-                <div id="loading-charts" class="text-center text-[#999999] p-8">⏳ Cargando gráficos...</div>
-                
-                {{-- 
-                    ======================================================
-                    MODIFICACIÓN: Cuadrícula de 2 a 3 columnas (lg:grid-cols-3)
-                    ======================================================
-                --}}
-                <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 hidden">
-                    {{-- Gráfico 1: pH --}}
-                    <div class="bg-[#fafafa] p-4 rounded-lg shadow-inner h-96 border border-[#e0e0e0]">
-                        <h4 class="text-lg font-semibold text-white mb-3">Gráfico de pH del Agua</h4>
-                        <canvas id="phChart"></canvas>
-                    </div>
-                    {{-- Gráfico 2: Temperatura --}}
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-inner h-96">
-                        <h4 class="text-lg font-semibold text-white mb-3">Gráfico de Temperatura (°C)</h4>
-                        <canvas id="tempChart"></canvas>
-                    </div>
-                    {{-- Gráfico 3: EC --}}
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-inner h-96">
-                        <h4 class="text-lg font-semibold text-white mb-3">Gráfico de Conductividad (EC)</h4>
-                        <canvas id="ecChart"></canvas>
-                    </div>
-                    {{-- Gráfico 4: Luz --}}
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-inner h-96">
-                        <h4 class="text-lg font-semibold text-white mb-3">Gráfico de Luz (lux)</h4>
-                        <canvas id="luzChart"></canvas>
-                    </div>
-                    
-                    {{-- 
-                        ======================================================
-                        NUEVO GRÁFICO: Humedad
-                        ======================================================
-                    --}}
-                    <div class="bg-gray-800 p-4 rounded-lg shadow-inner h-96">
-                        <h4 class="text-lg font-semibold text-white mb-3">Gráfico de Humedad (%)</h4>
-                        <canvas id="humedadChart"></canvas>
+            {{-- VISTA: GRÁFICOS HISTÓRICOS --}}
+            <div x-show="tab === 'graphs'" x-cloak x-transition>
+                <div class="bg-white/90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-lg" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
+                    <h3 class="text-xl font-bold text-[#1a1a1a] mb-6">📊 Histórico de Parámetros (Últimas 24h)</h3>
+                    <div id="loading-charts" class="text-center text-gray-500 p-8">⏳ Cargando gráficos...</div>
+                    <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 hidden">
+                        @foreach(['ph', 'temperatura', 'ec', 'luz', 'humedad'] as $chartKey)
+                        <div class="bg-gray-50 p-4 rounded-xl h-80 border border-gray-200">
+                            <canvas id="{{ $chartKey }}Chart"></canvas>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
     
-    <!-- LIBRERÍA DE GRÁFICOS (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
-    {{-- ====================================================== --}}
-    {{-- SCRIPT PARA GRÁFICOS (ACTUALIZADO PARA HUMEDAD) --}}
-    {{-- ====================================================== --}}
     <script>
-        const MODULO_ID = {{ $modulo->id }};
-        const apiUrl = window.location.origin + `/admin/dashboard/history/${MODULO_ID}`;
+        document.addEventListener('DOMContentLoaded', () => {
+            const MODULO_ID = {{ $modulo->id }};
+            const apiUrl = `${window.location.origin}/admin/dashboard/history/${MODULO_ID}`;
+            let chartInstances = {};
+            let chartsInterval;
 
-        // MODIFICACIÓN: Añadir instancia para el gráfico de humedad
-        let phChartInstance, tempChartInstance, ecChartInstance, luzChartInstance, humedadChartInstance;
-        let chartsInterval; 
+            function createOrUpdateChart(key, labels, dataset) {
+                const ctx = document.getElementById(`${key}Chart`).getContext('2d');
+                if (chartInstances[key]) {
+                    chartInstances[key].data.labels = labels;
+                    chartInstances[key].data.datasets[0].data = dataset.data;
+                    chartInstances[key].update('none');
+                } else {
+                    const colors = {
+                        ph: '#ff4b65',
+                        temperatura: '#3b82f6',
+                        ec: '#f59e0b',
+                        luz: '#eab308',
+                        humedad: '#0ea5e9'
+                    };
+                    const borderColor = colors[key] || '#9ca3af';
 
-        function fetchAndRenderCharts() {
-            fetch(apiUrl, {
-                headers: { 
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    chartInstances[key] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: dataset.label,
+                                data: dataset.data,
+                                borderColor: borderColor,
+                                backgroundColor: `${borderColor}33`,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 5,
+                                fill: true,
+                                pointHitRadius: 20,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    border: { display: false },
+                                    grid: { color: '#e5e7eb' },
+                                    ticks: { color: '#6b7280', font: { weight: '600' } }
+                                },
+                                x: {
+                                    type: 'time',
+                                    time: { unit: 'hour', displayFormats: { hour: 'HH:mm' } },
+                                    grid: { display: false },
+                                    ticks: { color: '#6b7280', font: { weight: '600' } }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: true, position: 'top', align: 'end', labels: { color: '#374151', font: { weight: 'bold' } } }
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index',
+                            }
+                        }
+                    });
                 }
-            })
+            }
+
+            function fetchAndRenderCharts() {
+                fetch(apiUrl, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }})
                 .then(response => {
-                    if (response.status === 419 || response.status === 401) {
-                        clearInterval(chartsInterval); 
-                        document.getElementById('loading-charts').innerHTML = `<p class="text-yellow-400 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
-                        window.location.reload(); 
-                        throw new Error('Sesión expirada.'); 
-                    }
-                    if (!response.ok) throw new Error('API Error: ' + response.statusText);
+                    if (response.status === 419) { window.location.reload(); }
+                    if (!response.ok) throw new Error('API Error');
                     return response.json();
                 })
                 .then(data => {
@@ -128,87 +219,28 @@
                     document.getElementById('charts-container').classList.remove('hidden');
                     
                     if (data.labels && data.labels.length > 0) {
-                        renderAllCharts(data);
+                        const chartData = {
+                            ph: { label: 'Nivel de pH', data: data.ph },
+                            temperatura: { label: 'Temperatura (°C)', data: data.temperatura },
+                            ec: { label: 'Conductividad (EC)', data: data.ec },
+                            luz: { label: 'Luz (lux)', data: data.luz },
+                            humedad: { label: 'Humedad (%)', data: data.humedad }
+                        };
+                        for (const key in chartData) {
+                            createOrUpdateChart(key, data.labels, chartData[key]);
+                        }
                     } else {
-                        document.getElementById('charts-container').innerHTML = '<p class="text-center text-yellow-500 p-8 col-span-full">No hay suficientes lecturas históricas para mostrar los gráficos.</p>';
+                        document.getElementById('charts-container').innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">No hay suficientes lecturas históricas para mostrar los gráficos.</p>';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching history:', error);
-                    if (error.message !== 'Sesión expirada.') {
-                        document.getElementById('loading-charts').innerHTML = `<p class="text-red-500">Error al cargar datos históricos: ${error.message}</p>`;
-                        document.getElementById('loading-charts').classList.remove('hidden'); 
-                    }
+                    document.getElementById('loading-charts').innerHTML = `<p class="text-red-500">Error al cargar datos históricos.</p>`;
                 });
-        }
-        
-        function updateOrCreateChart(canvasId, chartInstance, labels, dataset) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            if (chartInstance) {
-                chartInstance.data.labels = labels;
-                chartInstance.data.datasets[0].data = dataset.data;
-                chartInstance.update();
-                return chartInstance; 
             }
 
-            const newChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: dataset.label,
-                        data: dataset.data,
-                        borderColor: dataset.borderColor,
-                        backgroundColor: `${dataset.borderColor}1A`,
-                        tension: 0.3,
-                        pointRadius: 2,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { 
-                            title: { display: false },
-                            // Quitamos min/max para que se autoajuste
-                        }, 
-                        x: { title: { display: false } }
-                    },
-                    plugins: { legend: { display: true, labels: { color: '#ccc' } } }
-                }
-            });
-            
-            // MODIFICACIÓN: Guardar la instancia del nuevo gráfico
-            if (canvasId === 'phChart') phChartInstance = newChartInstance;
-            if (canvasId === 'tempChart') tempChartInstance = newChartInstance;
-            if (canvasId === 'ecChart') ecChartInstance = newChartInstance;
-            if (canvasId === 'luzChart') luzChartInstance = newChartInstance;
-            if (canvasId === 'humedadChart') humedadChartInstance = newChartInstance; // <-- AÑADIDO
-
-            return newChartInstance;
-        }
-
-        // Función que actualiza todas las instancias
-        function renderAllCharts(data) {
-            Chart.defaults.color = '#ccc';
-            Chart.defaults.font.family = 'Inter';
-
-            phChartInstance = updateOrCreateChart('phChart', phChartInstance, data.labels, { label: 'Nivel de pH', data: data.ph, borderColor: '#22c55e' });
-            tempChartInstance = updateOrCreateChart('tempChart', tempChartInstance, data.labels, { label: 'Temperatura (°C)', data: data.temperatura, borderColor: '#3b82f6' });
-            ecChartInstance = updateOrCreateChart('ecChart', ecChartInstance, data.labels, { label: 'Conductividad (EC)', data: data.ec, borderColor: '#f59e0b' });
-            luzChartInstance = updateOrCreateChart('luzChart', luzChartInstance, data.labels, { label: 'Luz (lux)', data: data.luz, borderColor: '#eab308' });
-            
-            // --- MODIFICACIÓN: AÑADIR LLAMADA AL GRÁFICO DE HUMEDAD ---
-            // (Usamos un color nuevo, ej: sky blue)
-            humedadChartInstance = updateOrCreateChart('humedadChart', humedadChartInstance, data.labels, { label: 'Humedad (%)', data: data.humedad, borderColor: '#0ea5e9' });
-        }
-
-        // Iniciar el proceso y luego refrescar cada 30 segundos
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchAndRenderCharts(); // Carga inicial
-            chartsInterval = setInterval(fetchAndRenderCharts, 30000); // Refresco automático
+            fetchAndRenderCharts();
+            chartsInterval = setInterval(fetchAndRenderCharts, 60000); // Refrescar cada minuto
         });
     </script>
 </x-app-layout>

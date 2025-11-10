@@ -37,12 +37,27 @@
             </div>
 
             {{-- Contenedor principal para la tabla y el panel de alertas --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ 
+                isModalOpen: false, 
+                modalData: {},
+                openModuleModal(row) {
+                    const data = row.dataset;
+                    this.modalData = {
+                        nombre_modulo: data.nombre_modulo,
+                        cultivo_actual: data.cultivo_actual,
+                        luz: data.luz,
+                        humedad: data.humedad,
+                        tiempo_reporte: data.tiempo_reporte,
+                        detail_url: data.detail_url
+                    };
+                    this.isModalOpen = true;
+                }
+            }">
 
                 {{-- Columna principal para la tabla de monitoreo (ocupa 2/3 del espacio) --}}
                 <div class="lg:col-span-2">
                     <div class="bg-white/90 backdrop-filter backdrop-blur-lg rounded-2xl p-8 border border-[#e0e0e0]" style="box-shadow: 0 8px 32px rgba(156, 0, 0, 0.08);">
-                        <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">📡 Estado General de Módulos Ocupados</h2>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">📡 Monitoreo Rápido de Módulos</h2>
                         <div id="monitoreo-table-container" class="overflow-x-auto relative">
                             <p class="text-[#999999] animate-pulse">Cargando datos de módulos...</p>
                         </div>
@@ -59,17 +74,42 @@
                     </div>
                 </div>
 
+                {{-- VENTANA MODAL PARA DETALLES DEL MÓDULO --}}
+                <div x-show="isModalOpen" x-cloak class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[999]" @click.self="isModalOpen = false">
+                    <div x-show="isModalOpen" x-transition class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 m-4">
+                        <h3 class="text-2xl font-bold text-[#1a1a1a] mb-2" x-text="modalData.nombre_modulo"></h3>
+                        <p class="text-sm text-[#555555] mb-6">Cultivo: <span class="font-semibold" x-text="modalData.cultivo_actual || 'No asignado'"></span></p>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <p class="text-gray-500">💡 Nivel de Luz</p>
+                                <p class="font-bold text-lg text-[#1a1a1a]" x-text="modalData.luz ? modalData.luz + ' lux' : '---'"></p>
+                            </div>
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <p class="text-gray-500">💧 Humedad</p>
+                                <p class="font-bold text-lg text-[#1a1a1a]" x-text="modalData.humedad ? modalData.humedad + ' %' : '---'"></p>
+                            </div>
+                            <div class="bg-gray-100 p-3 rounded-lg col-span-2">
+                                <p class="text-gray-500">📅 Último Reporte</p>
+                                <p class="font-bold text-lg text-[#1a1a1a]" x-text="modalData.tiempo_reporte"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-8 pt-6 border-t border-[#e0e0e0]">
+                            <button @click="isModalOpen = false" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">Cerrar</button>
+                            <a :href="modalData.detail_url" class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white rounded-lg font-semibold text-sm hover:shadow-lg transition">
+                                Ver Gráficos e Historial →
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- ========================================================= --}}
-    {{-- BLOQUE DE SCRIPTS COMPLETO Y CORREGIDO --}}
-    {{-- ========================================================= --}}
     <script>
         let adminMonitoreoInterval;
 
-        // Funciones auxiliares (getAlertStyles, formatNumber, formatTimeAgo)
         function getAlertStyles(estado) {
             estado = estado || 'Sin Lecturas';
             switch (estado) {
@@ -96,45 +136,20 @@
              return `Hace ${days} día${days > 1 ? 's' : ''}`;
         }
 
-        /**
-         * Genera el contenido del panel de alertas del Admin.
-         */
         function fetchAndRenderAlertsPanel() {
             const container = document.getElementById('admin-alerts-panel');
             if (!container) return;
-
-            const apiUrl = `{{ route('admin.dashboard.activeAlerts') }}`;
-
-            fetch(apiUrl, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }})
-            .then(response => {
-                if (!response.ok) throw new Error('Error API al cargar alertas.');
-                return response.json();
-            })
+            fetch(`{{ route('admin.dashboard.activeAlerts') }}`, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }})
+            .then(response => response.json())
             .then(data => {
-                if (!Array.isArray(data)) throw new Error('Respuesta de alertas inválida.');
-                
                 if (data.length === 0) {
-                    container.innerHTML = `<div class="text-center p-4 bg-green-500/10 rounded-lg">
-                        <p class="text-green-700 font-semibold">✅ ¡Todo en orden!</p>
-                        <p class="text-sm text-green-600">No hay alertas activas en el sistema.</p>
-                    </div>`;
+                    container.innerHTML = `<div class="text-center p-4 bg-green-500/10 rounded-lg"><p class="text-green-700 font-semibold">✅ ¡Todo en orden!</p><p class="text-sm text-green-600">No hay alertas activas.</p></div>`;
                     return;
                 }
-
                 let alertsHtml = '';
                 data.forEach(item => {
                     const styles = getAlertStyles(item.estado_alerta);
-                    alertsHtml += `
-                        <a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail" class="block p-3 rounded-lg hover:bg-gray-100 transition">
-                            <div class="flex justify-between items-center">
-                                <span class="font-semibold text-sm text-[#1a1a1a]">${item.nombre_modulo}</span>
-                                <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">
-                                    ${item.estado_alerta}
-                                </span>
-                            </div>
-                            <p class="text-xs text-[#555555] mt-1">Cultivo: ${item.cultivo_actual || 'N/A'}</p>
-                        </a>
-                    `;
+                    alertsHtml += `<a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail" class="block p-3 rounded-lg hover:bg-gray-100 transition"><div class="flex justify-between items-center"><span class="font-semibold text-sm text-[#1a1a1a]">${item.nombre_modulo}</span><span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">${item.estado_alerta}</span></div><p class="text-xs text-[#555555] mt-1">Cultivo: ${item.cultivo_actual || 'N/A'}</p></a>`;
                 });
                 container.innerHTML = alertsHtml;
             })
@@ -144,116 +159,71 @@
             });
         }
         
-        /**
-         * Genera el contenido de la tabla de monitoreo del Admin.
-         */
         function fetchAndRenderAdminTable() {
             const container = document.getElementById('monitoreo-table-container');
             if (!container) return; 
-            
-            const apiUrl = `{{ route('admin.dashboard.latest-data') }}`;
-
             if (container.querySelector('table')) {
                  container.querySelector('tbody').classList.add('opacity-50', 'transition-opacity');
-            } else {
-                container.innerHTML = `<p class="text-[#999999] animate-pulse">Refrescando datos...</p>`;
             }
-
-            fetch(apiUrl, {
-                headers: { 
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
+            fetch(`{{ route('admin.dashboard.latest-data') }}`, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }})
             .then(response => {
-                if (response.status === 419 || response.status === 401) {
-                    clearInterval(adminMonitoreoInterval); 
-                    container.innerHTML = `<p class="text-yellow-600 font-bold">Tu sesión ha expirado. Redirigiendo...</p>`;
-                    window.location.reload(); 
-                    throw new Error('Sesión expirada.'); 
-                }
+                if (response.status === 419 || response.status === 401) { window.location.reload(); throw new Error('Sesión expirada.'); }
                 if (!response.ok) throw new Error('Error API: ' + response.statusText);
                 return response.json(); 
             })
             .then(data => {
-                if (!Array.isArray(data)) throw new Error('Respuesta API inválida.');
                 if (data.length === 0) {
                     container.innerHTML = `<p class="text-[#999999]">📭 No hay módulos ocupados con datos.</p>`;
                     return;
                 }
-
-                let tableHtml = `
-                    <table class="min-w-full divide-y divide-[#e0e0e0]">
+                let tableHtml = `<table class="min-w-full divide-y divide-[#e0e0e0]">
                         <thead class="bg-gradient-to-r from-[#9c0000] to-[#ff4b65]">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">🔧 Módulo</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">🌱 Cultivo</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">pH</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">EC</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">🌡️ Temp (°C)</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">💡 Luz (lux)</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">💧 Humedad (%)</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">⚠️ Estado</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">📅 Último Reporte</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">⚙️ Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#e0e0e0]">
-                `;
-
+                        <tbody class="divide-y divide-[#e0e0e0]">`;
                 data.forEach(item => {
-                    const codigoModulo = item.nombre_modulo || `ID:${item.modulo_id}`;
-                    const cultivoActual = item.cultivo_actual || '<span class="italic text-[#999999]">Sin asignar</span>'; 
-                    const estadoAlerta = item.estado_alerta || 'Sin Lecturas'; 
-                    const styles = getAlertStyles(estadoAlerta);
-                    const tiempoReporte = formatTimeAgo(item.minutos_offline, item.hora_ultima_lectura);
-                    const isOfflineOrNoData = estadoAlerta === 'OFFLINE' || estadoAlerta === 'Sin Lecturas';
-
-                    const phDisplay = formatNumber(item.ph, 2);
-                    const ecDisplay = formatNumber(item.ec, 2);
-                    const tempDisplay = formatNumber(item.temperatura, 1);
-                    const luzDisplay = formatNumber(item.luz, 0); 
-                    const humedadDisplay = formatNumber(item.humedad, 1); 
-
+                    const styles = getAlertStyles(item.estado_alerta);
                     tableHtml += `
-                        <tr class="bg-white hover:bg-[#ffdef0]/30 transition duration-150 border-b border-[#e0e0e0]">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#1a1a1a]">${codigoModulo}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${cultivoActual}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${phDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${ecDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${tempDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${luzDisplay}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${humedadDisplay}</td>
+                        <tr class="hover:bg-[#ffdef0]/30 transition duration-150 cursor-pointer" 
+                            @click="openModuleModal($event.currentTarget)"
+                            data-nombre_modulo="${item.nombre_modulo || `ID:${item.modulo_id}`}"
+                            data-cultivo_actual="${item.cultivo_actual || ''}"
+                            data-luz="${formatNumber(item.luz, 0)}"
+                            data-humedad="${formatNumber(item.humedad, 1)}"
+                            data-tiempo_reporte="${formatTimeAgo(item.minutos_offline, item.hora_ultima_lectura)}"
+                            data-detail_url="${window.location.origin}/admin/modulos/${item.modulo_id}/detail">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#1a1a1a]">${item.nombre_modulo || `ID:${item.modulo_id}`}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${formatNumber(item.ph, 2)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${formatNumber(item.ec, 2)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">${formatNumber(item.temperatura, 1)}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${styles.bg} ${styles.text}">
-                                    ${estadoAlerta}
+                                    ${item.estado_alerta || 'Sin Lecturas'}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-[#999999]">${tiempoReporte}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <a href="${window.location.origin}/admin/modulos/${item.modulo_id}/detail" class="text-[#ff4b65] hover:text-[#9c0000] font-semibold transition">Ver Detalle →</a>
-                            </td>
-                        </tr>
-                    `;
+                        </tr>`;
                 });
-
                 tableHtml += `</tbody></table>`;
                 container.innerHTML = tableHtml;
-
             })
             .catch(error => {
-                console.error('Error en la obtención de datos (Admin Dashboard):', error);
+                console.error('Error en la tabla de monitoreo:', error);
                 if (error.message !== 'Sesión expirada.') {
-                    container.innerHTML = `<p class="text-red-600 font-semibold">❌ Error al cargar la tabla: ${error.message}.</p>`; 
+                    container.innerHTML = `<p class="text-red-600 font-semibold">❌ Error al cargar la tabla.</p>`; 
                 }
             });
         }
 
-        // Carga inicial y refresco automático
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('monitoreo-table-container')) {
                  fetchAndRenderAdminTable();
-                 fetchAndRenderAlertsPanel(); // <-- Llamada a la nueva función
+                 fetchAndRenderAlertsPanel();
                  adminMonitoreoInterval = setInterval(() => {
                     fetchAndRenderAdminTable();
                     fetchAndRenderAlertsPanel();
