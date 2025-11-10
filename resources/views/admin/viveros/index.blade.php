@@ -21,12 +21,12 @@
                     </div>
                 </div>
 
-                <div class="mb-6 p-5 bg-[#fafafa] rounded-xl border border-[#e0e0e0]">
+                <div class="mb-6 p-5 bg-white/50 rounded-xl border" style="border-color: var(--border);">
                     <form method="GET" action="{{ route('admin.viveros.index') }}">
-                        <label for="filtro-dueño" class="block font-semibold text-sm text-[#1a1a1a] mb-3">🔍 Filtrar por Dueño</label>
+                        <label for="filtro-dueño" class="block font-semibold text-sm text-text-dark mb-3">🔍 Filtrar por Dueño</label>
                         <div class="flex items-center gap-3">
                             <div class="flex-grow">
-                                <select id="filtro-dueño" name="dueño_id" class="block w-full px-4 py-2 bg-white border border-[#e0e0e0] text-[#1a1a1a] rounded-lg focus:outline-none focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0]">
+                                <select id="filtro-dueño" name="dueño_id" class="block w-full bg-gray-100 border-gray-300 rounded-md shadow-sm focus:border-strawberry focus:ring-strawberry">
                                     <option value="">Todos los Dueños</option>
                                     @foreach ($dueños as $dueño)
                                         <option value="{{ $dueño->id }}" @if(request('dueño_id') == $dueño->id) selected @endif>
@@ -36,10 +36,10 @@
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="submit" class="px-5 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white font-semibold rounded-lg hover:shadow-lg transition text-sm">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-lg font-semibold text-sm text-white transition" style="background-color: var(--strawberry);" onmouseover="this.style.backgroundColor='var(--strawberry-dark)'" onmouseout="this.style.backgroundColor='var(--strawberry)'">
                                     Filtrar
                                 </button>
-                                <a href="{{ route('admin.viveros.index') }}" class="px-5 py-2 bg-[#e0e0e0] text-[#555555] font-semibold rounded-lg hover:bg-[#d0d0d0] transition text-sm">
+                                <a href="{{ route('admin.viveros.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-lg font-semibold text-sm text-gray-800 transition hover:bg-gray-300">
                                     Limpiar
                                 </a>
                             </div>
