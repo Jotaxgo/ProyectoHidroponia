@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-hydro-text-light">
+        <h2 class="text-lg font-medium text-text-dark">
             {{ __('Información del Perfil') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-400">
+        <p class="mt-1 text-sm text-text-muted">
             {{ __("Actualiza la información de tu perfil y tu dirección de correo electrónico.") }}
         </p>
     </header>
@@ -18,26 +18,26 @@
         @method('patch')
 
         <div>
-            <label for="name" class="block font-medium text-sm text-hydro-text-light">{{ __('Nombre') }}</label>
-            <input id="name" name="name" type="text" class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white rounded-md shadow-sm" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
+            <label for="name" class="block font-medium text-sm text-text-dark">{{ __('Nombre') }}</label>
+            <input id="name" name="name" type="text" class="block mt-1 w-full bg-gray-100 border-gray-300 rounded-md shadow-sm focus:border-strawberry focus:ring-strawberry" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div>
-            <label for="email" class="block font-medium text-sm text-hydro-text-light">{{ __('Correo Electrónico') }}</label>
-            <input id="email" name="email" type="email" class="block mt-1 w-full bg-hydro-dark border-hydro-border text-white rounded-md shadow-sm" value="{{ old('email', $user->email) }}" required autocomplete="username" />
+            <label for="email" class="block font-medium text-sm text-text-dark">{{ __('Correo Electrónico') }}</label>
+            <input id="email" name="email" type="email" class="block mt-1 w-full bg-gray-100 border-gray-300 rounded-md shadow-sm focus:border-strawberry focus:ring-strawberry" value="{{ old('email', $user->email) }}" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-200">
+                    <p class="text-sm mt-2 text-gray-800">
                         {{ __('Tu dirección de correo electrónico no está verificada.') }}
-                        <button form="send-verification" class="underline text-sm text-gray-400 hover:text-gray-100 rounded-md">
+                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             {{ __('Haz clic aquí para reenviar el correo de verificación.') }}
                         </button>
                     </p>
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-400">
+                        <p class="mt-2 font-medium text-sm text-green-600">
                             {{ __('Se ha enviado un nuevo enlace de verificación a tu dirección de correo.') }}
                         </p>
                     @endif
@@ -46,10 +46,10 @@
         </div>
 
         <div class="flex items-center gap-4">
-            <button type="submit" class="inline-flex items-center px-4 py-2 bg-hydro-accent-gold border border-transparent rounded-md font-semibold text-xs text-hydro-dark uppercase tracking-widest hover:opacity-90 transition">{{ __('Guardar') }}</button>
+            <button type="submit" class="inline-flex items-center px-4 py-2 rounded-lg font-semibold text-sm text-white transition" style="background-color: var(--strawberry);" onmouseover="this.style.backgroundColor='var(--strawberry-dark)'" onmouseout="this.style.backgroundColor='var(--strawberry)'">{{ __('Guardar') }}</button>
 
             @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-400">{{ __('Guardado.') }}</p>
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-sm text-gray-600">{{ __('Guardado.') }}</p>
             @endif
         </div>
     </form>

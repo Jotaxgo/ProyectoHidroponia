@@ -30,16 +30,22 @@ class NotificationController extends Controller
         $user = Auth::user();
         $notification = $user->notifications()->findOrFail($id);
 
+        // 1. Calcular la página ANTES de marcarla como leída (el orden no cambia)
+        $perPage = 10; // El mismo valor que usas en paginate() en el método index
+        $allNotifications = $user->notifications()->latest()->pluck('id');
+        $position = $allNotifications->search($notification->id);
+        $page = $position !== false ? floor($position / $perPage) + 1 : 1;
+
+        // 2. Marcar la notificación como leída
         $notification->markAsRead();
 
         if (request()->wantsJson()) {
             return response()->json(['status' => 'success']);
         }
 
-        // Flash the specific notification data and its ID to the session to be displayed once.
-        return redirect()->route('notifications.index')
+        // 3. Redirigir a la página y ancla correctas
+        return redirect()->route('notifications.index', ['page' => $page, '_fragment' => 'notification-' . $notification->id])
             ->with('status', 'Notificación marcada como leída.')
-            ->with('highlighted_notification', $notification->data)
             ->with('highlighted_id', $notification->id);
     }
 
