@@ -35,12 +35,24 @@
         <table class="w-full text-sm text-left {{ !$isPdf ? 'text-[#555555]' : '' }}">
             <thead class="{{ !$isPdf ? 'text-xs text-[#1a1a1a] uppercase bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]' : '' }}">
                 <tr>
-                    <th class="px-4 py-3 {{ !$isPdf ? 'border-r border-[#e0e0e0] align-bottom font-semibold' : '' }}">Fecha y Hora</th>
-                    <th class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">pH (Prom)</th>
-                    <th class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">EC (Prom)</th>
-                    <th class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Temp (°C) (Prom)</th>
-                    <th class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Luz (lux) (Prom)</th>
-                    <th class="px-4 py-3 text-center {{ !$isPdf ? 'font-semibold' : '' }}">Humedad (%) (Prom)</th>
+                    <th rowspan="2" class="px-4 py-3 {{ !$isPdf ? 'border-r border-[#e0e0e0] align-bottom font-semibold' : '' }}">Fecha y Hora</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">pH</th>
+                    <th colspan="3" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">EC (mS/cm)</th>
+                    <th colspan="1" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Temp (°C)</th>
+                    <th colspan="1" class="px-4 py-3 text-center {{ !$isPdf ? 'border-r border-[#e0e0e0] font-semibold' : '' }}">Luz (lux)</th>
+                    <th colspan="1" class="px-4 py-3 text-center {{ !$isPdf ? 'font-semibold' : '' }}">Humedad (%)</th>
+                </tr>
+                <tr class="{{ !$isPdf ? 'text-xs text-[#1a1a1a] uppercase bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]' : '' }}">
+                    {{-- Sub-cabeceras --}}
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Min</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Max</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium {{ !$isPdf ? 'border-r border-[#e0e0e0]' : '' }}">Prom</th>
+                    <th class="px-2 py-2 text-center font-medium">Prom</th>
                 </tr>
             </thead>
             <tbody class="{{ !$isPdf ? 'divide-y divide-[#e0e0e0]' : '' }}">
@@ -49,15 +61,24 @@
                         <td class="{{ !$isPdf ? 'px-4 py-2 font-medium text-[#1a1a1a] whitespace-nowrap border-r border-[#e0e0e0]' : '' }}">
                             {{ \Carbon\Carbon::parse($lecturaHora->hora_grupo)->format('d/m H:00') }}
                         </td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ph_avg, 2, ',', '.') }}</td>
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_avg, 2, ',', '.') }}</td>
+                        {{-- PH --}}
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ph_min, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->ph_avg, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ph_max, 2, ',', '.') }}</td>
+                        {{-- EC --}}
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_min, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->ec_avg, 2, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_max, 2, ',', '.') }}</td>
+                        {{-- Temp --}}
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->temperatura_avg, 1, ',', '.') }}</td>
+                        {{-- Luz --}}
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->luz_avg, 0, '', '.') }}</td>
+                        {{-- Humedad --}}
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center' : '' }}">{{ number_format($lecturaHora->humedad_avg, 1, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-[#999999]' : '' }}">
+                        <td colspan="9" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-[#999999]' : '' }}">
                             📭 No se encontraron lecturas registradas para este módulo en el período seleccionado.
                         </td>
                     </tr>

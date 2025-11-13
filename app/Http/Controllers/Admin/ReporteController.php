@@ -183,6 +183,9 @@ class ReporteController extends Controller
             'dueno' => $modulo->vivero->user,
             'generadoPor' => $user->full_name,
             'fechaGeneracion' => Carbon::now()->isoFormat('D MMMM YYYY, H:mm'),
+            'limits' => config('hydroponics.limits'), // Añadimos los límites de los sensores
+            'cultivoActual' => $modulo->cultivo_actual, // Añadimos el cultivo actual
+            'fechaSiembra' => $modulo->fecha_siembra, // Añadimos la fecha de siembra
         ];
 
         // Generar y descargar el PDF
