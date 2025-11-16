@@ -38,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // El dashboard principal que redirige según el rol
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Ruta para el control de la bomba
+    Route::post('/modulos/{modulo}/toggle-bomba', [DashboardController::class, 'toggleBomba'])->name('modulos.toggle-bomba');
+
     // Rutas del perfil del usuario logueado
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

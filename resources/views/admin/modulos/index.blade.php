@@ -81,6 +81,18 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-2 flex-wrap">
+                                        {{-- Botón para controlar la bomba --}}
+                                        <button
+                                            class="bomba-toggle-btn inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold transition
+                                                {{ $modulo->bomba_estado ? 'bg-red-500/20 text-red-600 hover:bg-red-500/30' : 'bg-sky-500/20 text-sky-600 hover:bg-sky-500/30' }}"
+                                            data-modulo-id="{{ $modulo->id }}">
+                                            @if($modulo->bomba_estado)
+                                                💧 Apagar Bomba
+                                            @else
+                                                💧 Encender Bomba
+                                            @endif
+                                        </button>
+
                                         @if($modulo->estado == 'Disponible')
                                             <a href="{{ route('admin.viveros.modulos.startCultivoForm', [$vivero, $modulo]) }}" class="inline-flex items-center px-3 py-1.5 bg-[#96d900]/20 text-[#6b9b00] rounded-lg text-xs font-semibold hover:bg-[#96d900]/30 transition">
                                                 🌱 Iniciar
@@ -255,6 +267,64 @@
                 fetchAndRenderOwnerTable(); 
                 monitoreoInterval = setInterval(fetchAndRenderOwnerTable, 30000); 
             }
+        });
+    </script>
+
+    {{-- ====================================================== --}}
+    {{-- SCRIPT PARA EL CONTROL DE LA BOMBA --}}
+    {{-- ====================================================== --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButtons = document.querySelectorAll('.bomba-toggle-btn');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const moduloId = this.dataset.moduloId;
+                    const url = `/modulos/${moduloId}/toggle-bomba`; // Usamos la ruta directa
+
+                    // Deshabilitar botón para evitar clics múltiples
+                    this.disabled = true;
+                    this.innerHTML = 'Cambiando...';
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Actualizar la UI del botón
+                        const isBombaOn = data.bomba_estado;
+                        this.innerHTML = isBombaOn ? '💧 Apagar Bomba' : '💧 Encender Bomba';
+
+                        // Quitar clases viejas y añadir las nuevas
+                        this.classList.remove('bg-red-500/20', 'text-red-600', 'hover:bg-red-500/30', 'bg-sky-500/20', 'text-sky-600', 'hover:bg-sky-500/30');
+                        
+                        if (isBombaOn) {
+                            this.classList.add('bg-red-500/20', 'text-red-600', 'hover:bg-red-500/30');
+                        } else {
+                            this.classList.add('bg-sky-500/20', 'text-sky-600', 'hover:bg-sky-500/30');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al cambiar estado de la bomba:', error);
+                        // Revertir el texto del botón en caso de error
+                        // (Una implementación más robusta podría leer el estado original)
+                        this.innerHTML = 'Error';
+                    })
+                    .finally(() => {
+                        // Volver a habilitar el botón
+                        this.disabled = false;
+                    });
+                });
+            });
         });
     </script>
 </x-app-layout>

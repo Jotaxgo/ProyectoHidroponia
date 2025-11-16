@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LecturaSensorController;
 use App\Http\Controllers\Api\ApiDashboardController;
 use App\Http\Controllers\Api\ApiOwnerDashboardController;
-
+use App\Http\Controllers\Api\BombaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,3 +36,5 @@ Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getMo
 // Devuelve el estado de los módulos filtrados por el dueño (usuario) autenticado.
 Route::get('/owner/my-modules/latest-data', [ApiOwnerDashboardController::class, 'getOwnerModuleData'])->middleware('auth:sanctum');
 
+Route::get('/bomba/{device_id}', [BombaController::class, 'estado']);
+Route::post('/bomba/{device_id}', [BombaController::class, 'cambiarEstado']);

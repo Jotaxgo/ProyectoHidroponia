@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -62,5 +63,13 @@ class DashboardController extends Controller
         }
 
         return redirect('/');
+    }
+
+    public function toggleBomba(Modulo $modulo)
+    {
+        $modulo->bomba_estado = !$modulo->bomba_estado;
+        $modulo->save();
+
+        return response()->json(['bomba_estado' => $modulo->bomba_estado]);
     }
 }

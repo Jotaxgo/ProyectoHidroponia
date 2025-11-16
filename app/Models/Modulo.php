@@ -20,11 +20,15 @@ class Modulo extends Model
         'cultivo_actual',
         'fecha_siembra',
         'hardware_info',
+        'bomba_estado',
     ];
 
     protected $casts = [
         'hardware_info' => 'array',
+        'bomba_estado' => 'boolean',
     ];
+
+
 
     // 1. RELACIÓN AL VIVERO AL QUE PERTENECE
     public function vivero(): BelongsTo
@@ -69,4 +73,5 @@ class Modulo extends Model
         }
         */
     }
+    
 }
