@@ -39,27 +39,7 @@
                             <input id="device_id" name="device_id" type="text" value="{{ old('device_id') }}" placeholder="Ej: MOD-A01-HW-12345" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
                         </div>
 
-                        <div class="pt-6 border-t border-[#e0e0e0] space-y-4">
-                            <h3 class="text-lg font-bold text-[#1a1a1a]">⚙️ Límites para Alertas (Opcional)</h3>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label for="ph_min" class="block font-semibold text-sm text-[#1a1a1a] mb-2">pH Mínimo</label>
-                                    <input id="ph_min" name="ph_min" type="number" step="0.1" value="{{ old('ph_min') }}" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
-                                </div>
-                                <div>
-                                    <label for="ph_max" class="block font-semibold text-sm text-[#1a1a1a] mb-2">pH Máximo</label>
-                                    <input id="ph_max" name="ph_max" type="number" step="0.1" value="{{ old('ph_max') }}" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
-                                </div>
-                                <div>
-                                    <label for="temp_min" class="block font-semibold text-sm text-[#1a1a1a] mb-2">Temp. Mínima (°C)</label>
-                                    <input id="temp_min" name="temp_min" type="number" step="0.1" value="{{ old('temp_min') }}" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
-                                </div>
-                                <div>
-                                    <label for="temp_max" class="block font-semibold text-sm text-[#1a1a1a] mb-2">Temp. Máxima (°C)</label>
-                                    <input id="temp_max" name="temp_max" type="number" step="0.1" value="{{ old('temp_max') }}" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-[#e0e0e0]">

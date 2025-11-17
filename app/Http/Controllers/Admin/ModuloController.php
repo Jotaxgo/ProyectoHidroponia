@@ -38,19 +38,11 @@ class ModuloController extends Controller
             'codigo_identificador' => 'required|string|max:255|unique:modulos',
             'capacidad' => 'required|integer|min:1',
             'device_id' => 'nullable|string|max:255',
-            'ph_min' => 'nullable|numeric',
-            'ph_max' => 'nullable|numeric|gte:ph_min',
-            'temp_min' => 'nullable|numeric',
-            'temp_max' => 'nullable|numeric|gte:temp_min',
         ]);
 
         // Preparamos el array para la columna JSON
         $hardwareInfo = [
             'device_id' => $request->device_id,
-            'ph_min' => $request->ph_min,
-            'ph_max' => $request->ph_max,
-            'temp_min' => $request->temp_min,
-            'temp_max' => $request->temp_max,
         ];
 
         $vivero->modulos()->create([
@@ -94,11 +86,6 @@ class ModuloController extends Controller
             'capacidad' => 'required|integer|min:1',
             'estado' => 'required|string',
             'device_id' => 'nullable|string|max:255',
-            // --- NUEVAS VALIDACIONES ---
-            'ph_min' => 'nullable|numeric',
-            'ph_max' => 'nullable|numeric|gte:ph_min', // gte: greater than or equal
-            'temp_min' => 'nullable|numeric',
-            'temp_max' => 'nullable|numeric|gte:temp_min',
         ]);
 
         // Obtenemos la info de hardware existente o creamos un array vacío
@@ -106,10 +93,6 @@ class ModuloController extends Controller
 
         // Actualizamos los valores con los nuevos datos del formulario
         $hardwareInfo['device_id'] = $request->device_id;
-        $hardwareInfo['ph_min'] = $request->ph_min;
-        $hardwareInfo['ph_max'] = $request->ph_max;
-        $hardwareInfo['temp_min'] = $request->temp_min;
-        $hardwareInfo['temp_max'] = $request->temp_max;
 
         $modulo->update([
             'codigo_identificador' => $request->codigo_identificador,
