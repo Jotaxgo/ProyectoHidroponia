@@ -58,6 +58,7 @@
                                 <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Código</th>
                                 <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Device ID</th>
                                 <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Estado</th>
+                                <th scope="col" class="px-6 py-4 text-left font-semibold text-[#1a1a1a]">Estado Bomba</th>
                                 <th scope="col" class="px-6 py-4 text-center font-semibold text-[#1a1a1a]">Acciones</th>
                             </tr>
                         </thead>
@@ -79,18 +80,32 @@
                                         @if($modulo->estado == 'Disponible')✅ @elseif($modulo->estado == 'Ocupado')🌱 @else🔧 @endif {{ $modulo->estado }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4" id="bomba-status-{{ $modulo->id }}">
+                                    @if($modulo->bomba_estado)
+                                        {{-- Estado 1 es Apagada --}}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">
+                                            <span class="w-2 h-2 mr-2 bg-gray-500 rounded-full"></span>
+                                            Apagada
+                                        </span>
+                                    @else
+                                        {{-- Estado 0 es Encendida --}}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-800">
+                                            <span class="w-2 h-2 mr-2 bg-green-500 rounded-full"></span>
+                                            Encendida
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-center gap-2 flex-wrap">
                                         {{-- Botón para controlar la bomba --}}
                                         <button
-                                            class="bomba-toggle-btn inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold transition
-                                                {{ $modulo->bomba_estado ? 'bg-red-500/20 text-red-600 hover:bg-red-500/30' : 'bg-sky-500/20 text-sky-600 hover:bg-sky-500/30' }}"
+                                            title="{{ $modulo->bomba_estado ? 'Encender Bomba' : 'Apagar Bomba' }}"
+                                            class="bomba-toggle-btn inline-flex items-center justify-center w-10 h-10 rounded-full transition
+                                                {{ $modulo->bomba_estado ? 'bg-green-200 text-green-800 hover:bg-green-300' : 'bg-red-200 text-red-800 hover:bg-red-300' }}"
                                             data-modulo-id="{{ $modulo->id }}">
-                                            @if($modulo->bomba_estado)
-                                                💧 Apagar Bomba
-                                            @else
-                                                💧 Encender Bomba
-                                            @endif
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+                                            </svg>
                                         </button>
 
                                         @if($modulo->estado == 'Disponible')
@@ -111,7 +126,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-[#999999]">
+                                <td colspan="5" class="px-6 py-8 text-center text-[#999999]">
                                     <div class="flex flex-col items-center gap-2">
                                         <span class="text-2xl">📭</span>
                                         <p>Este vivero aún no tiene módulos.</p>
@@ -284,7 +299,7 @@
 
                     // Deshabilitar botón para evitar clics múltiples
                     this.disabled = true;
-                    this.innerHTML = 'Cambiando...';
+                    this.innerHTML = `<svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
                     fetch(url, {
                         method: 'POST',
@@ -300,24 +315,39 @@
                         return response.json();
                     })
                     .then(data => {
-                        // Actualizar la UI del botón
-                        const isBombaOn = data.bomba_estado;
-                        this.innerHTML = isBombaOn ? '💧 Apagar Bomba' : '💧 Encender Bomba';
+                        const isStateOne = data.bomba_estado; // true (1) is OFF, false (0) is ON
+                        const statusCell = document.getElementById(`bomba-status-${moduloId}`);
 
-                        // Quitar clases viejas y añadir las nuevas
-                        this.classList.remove('bg-red-500/20', 'text-red-600', 'hover:bg-red-500/30', 'bg-sky-500/20', 'text-sky-600', 'hover:bg-sky-500/30');
+                        // Restaurar el icono del botón
+                        this.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" /></svg>`;
                         
-                        if (isBombaOn) {
-                            this.classList.add('bg-red-500/20', 'text-red-600', 'hover:bg-red-500/30');
-                        } else {
-                            this.classList.add('bg-sky-500/20', 'text-sky-600', 'hover:bg-sky-500/30');
+                        // Actualizar título y clases del botón
+                        this.setAttribute('title', isStateOne ? 'Encender Bomba' : 'Apagar Bomba');
+                        this.classList.remove('bg-green-200', 'text-green-800', 'hover:bg-green-300', 'bg-red-200', 'text-red-800', 'hover:bg-red-300');
+                        if (isStateOne) { // Está APAGADA (estado 1), la acción es ENCENDER (verde)
+                            this.classList.add('bg-green-200', 'text-green-800', 'hover:bg-green-300');
+                        } else { // Está ENCENDIDA (estado 0), la acción es APAGAR (rojo)
+                            this.classList.add('bg-red-200', 'text-red-800', 'hover:bg-red-300');
+                        }
+
+                        // Actualizar el indicador de estado
+                        if (statusCell) {
+                            if (isStateOne) { // Está APAGADA
+                                statusCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">
+                                                            <span class="w-2 h-2 mr-2 bg-gray-500 rounded-full"></span>
+                                                            Apagada
+                                                        </span>`;
+                            } else { // Está ENCENDIDA
+                                statusCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-800">
+                                                            <span class="w-2 h-2 mr-2 bg-green-500 rounded-full"></span>
+                                                            Encendida
+                                                        </span>`;
+                            }
                         }
                     })
                     .catch(error => {
                         console.error('Error al cambiar estado de la bomba:', error);
-                        // Revertir el texto del botón en caso de error
-                        // (Una implementación más robusta podría leer el estado original)
-                        this.innerHTML = 'Error';
+                        this.innerHTML = `❓`; // Icono de error
                     })
                     .finally(() => {
                         // Volver a habilitar el botón

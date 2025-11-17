@@ -1,0 +1,112 @@
+// Tiempos de consulta (en milisegundos)
+unsigned long tiempoConsultaBomba = 2000;   // Preguntar por la bomba cada 2 segundos
+unsigned long tiempoEnvioSensores = 30000; // Enviar datos de sensores cada 30 segundos
+// Variables para controlar el tiempo
+unsigned long tiempoAnteriorBomba = 0;
+unsigned long tiempoAnteriorSensores = 0;
+/* =============================================================== */
+/* SETUP                                                         */
+/* =============================================================== */
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH); // Inicia en HIGH (apagado para relé activo-bajo)
+  WiFi.begin(ssid, password);
+  Serial.print("Conectando a WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi conectado. IP: " + WiFi.localIP().toString());
+  Wire.begin(21, 22);
+  lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
+  dht.begin();
+}
+/* =============================================================== */
+/* LOOP (MODIFICADO CON DOS TEMPORIZADORES)                        */
+/* =============================================================== */
+void loop() {
+  unsigned long tiempoActual = millis();
+  // --- TEMPORIZADOR 1: Revisa el estado de la bomba (cada 2 segundos) ---
+  if (tiempoActual - tiempoAnteriorBomba >= tiempoConsultaBomba) {
+    tiempoAnteriorBomba = tiempoActual;
+    consultarBomba();
+  }
+  // --- TEMPORIZADOR 2: Lee y envía los datos de los sensores (cada 30 segundos) ---
+  if (tiempoActual - tiempoAnteriorSensores >= tiempoEnvioSensores) {
+    tiempoAnteriorSensores = tiempoActual;
+    // Leer sensores solo cuando se van a enviar
+    float temperatura = dht.readTemperature();
+    float humedad = dht.readHumidity();
+    float luz = lightMeter.readLightLevel();
+    int phRaw = analogRead(PH_PIN);
+    float voltajePH = (phRaw * 3.3) / 4095.0;
+    float ph = 7.0 + ((2.5 - voltajePH) * 3.5);
+    int ecRaw = analogRead(EC_PIN);
+    float voltajeEC = (ecRaw * 3.3) / 4095.0;
+    float ec = (133.42 * pow(voltajeEC, 3) - 255.86 * pow(voltajeEC, 2) + 857.39 * voltajeEC) * 0.5;
+    if (!isnan(temperatura) && !isnan(humedad)) {
+      enviarDatos(temperatura, humedad, ph, ec, luz);
+    }
+  }
+}
+/* =============================================================== */
+/* FUNCIÓN PARA ENVIAR DATOS (SIN CAMBIOS)                         */
+/* =============================================================== */
+void enviarDatos(float temperatura, float humedad, float ph, float ec, float luz) {
+  HTTPClient http;
+     http.begin(serverUrl);
+
+     http.addHeader("Content-Type", "application/json");
+     http.addHeader("Accept", "application/json");
+     http.addHeader("Authorization", "Bearer " + String(API_TOKEN));
+
+     StaticJsonDocument<250> doc;
+     doc["device_id"] = DEVICE_ID;
+     doc["temperatura"] = temperatura;
+     doc["humedad"] = humedad;
+     doc["ph"] = ph;
+     doc["ec"] = ec;
+     doc["luz"] = luz;
+
+     String jsonPayload;
+     serializeJson(doc, jsonPayload);
+
+     int httpCode = http.POST(jsonPayload);
+  Serial.print("Enviando datos -> ");
+  Serial.println(jsonPayload);
+  if (httpCode > 0) {
+    Serial.printf("[HTTP %d] %s\n", httpCode, http.getString().c_str());
+  } else {
+    Serial.println("Error en POST lecturas");
+  }
+  http.end();
+}
+/* =============================================================== */
+/* CONSULTAR ESTADO DE BOMBA (LÓGICA CORREGIDA)                    */
+/* =============================================================== */
+void consultarBomba() {
+  HTTPClient http;
+  http.begin(bombaUrl);
+  http.addHeader("Authorization", "Bearer " + String(API_TOKEN));
+  http.addHeader("Accept", "application/json");
+  int httpCode = http.GET();
+  if (httpCode == 200) {
+    String response = http.getString();
+    StaticJsonDocument<200> doc;
+    deserializeJson(doc, response);
+    bool estado = doc["bomba_estado"]; // true es 1, false es 0
+    Serial.print("Estado de bomba recibido: ");
+    Serial.println(estado);
+    // Lógica corregida: "estado 1 es bomba apagada"
+    // Esto significa que tu relé es "activo-bajo" (se enciende con LOW)
+    if (estado) { // estado es 1 (true), la bomba debe estar APAGADA
+      digitalWrite(RELAY_PIN, HIGH);
+    } else { // estado es 0 (false), la bomba debe estar ENCENDIDA
+      digitalWrite(RELAY_PIN, LOW);
+    }
+  } else {
+    Serial.println("Error al consultar bomba");
+  }
+  http.end();
+}
