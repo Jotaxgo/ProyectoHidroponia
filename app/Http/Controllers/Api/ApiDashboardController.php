@@ -93,24 +93,29 @@ class ApiDashboardController extends Controller
      * Devuelve el historial de lecturas (últimas 24h) para un módulo específico.
      * (CORREGIDO PARA INCLUIR HUMEDAD CORRECTAMENTE)
      */
-    public function getModuleHistory(Modulo $modulo)
+    public function getModuleHistory(Request $request, Modulo $modulo)
     {
-        $last24Hours = Carbon::now()->subHours(24);
+        // 1. Obtener el rango de horas desde la URL, con 24h como valor por defecto.
+        $rangeInHours = (int) $request->query('range', 24);
 
+        // 2. Calcular la fecha de inicio basada en el rango.
+        $startDate = \Carbon\Carbon::now('UTC')->subHours($rangeInHours);
+
+        // 3. Realizar la consulta a la base de datos usando el rango dinámico.
         $lecturas = LecturaSensor::where('modulo_id', $modulo->id)
-            ->where('created_at', '>=', $last24Hours)
+            ->where('created_at', '>=', $startDate)
             ->orderBy('created_at', 'asc')
-            // --- ¡ASEGÚRATE DE QUE 'humedad' ESTÉ EN EL SELECT! ---
             ->select('created_at', 'ph', 'temperatura', 'ec', 'luz', 'humedad') 
             ->get();
 
+        // 4. Formatear los datos para la respuesta JSON.
+        //    Se ajusta el formato de la fecha para incluir día y mes, útil para rangos largos.
         $data = [
-            'labels' => $lecturas->map(fn($l) => Carbon::parse($l->created_at)->format('H:i')),
+            'labels' => $lecturas->map(fn($l) => $l->created_at->toIso8601String()),
             'ph' => $lecturas->pluck('ph')->map(fn($val) => (float)$val),
             'temperatura' => $lecturas->pluck('temperatura')->map(fn($val) => (float)$val),
             'ec' => $lecturas->pluck('ec')->map(fn($val) => (float)$val),
             'luz' => $lecturas->pluck('luz')->map(fn($val) => (int)$val),
-            // --- ¡ASEGÚRATE DE QUE 'humedad' SE ESTÉ PROCESANDO! ---
             'humedad' => $lecturas->pluck('humedad')->map(fn($val) => (float)$val),
         ];
 
