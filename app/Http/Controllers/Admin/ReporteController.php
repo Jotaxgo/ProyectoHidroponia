@@ -196,16 +196,146 @@ class ReporteController extends Controller
 
     // --- REPORTE DE VIVEROS ---
 
-    public function showViverosReport()
+    public function showViverosReport(Request $request)
     {
-        $viveros = Vivero::with('user')->withCount('modulos')->get();
-        return view('admin.reportes.viveros-report', compact('viveros'));
+        // Lógica de cálculo de alertas
+        $PH_MIN = 5.8;
+        $PH_MAX = 6.4;
+        $TEMP_MAX = 25.0;
+        $OFFLINE_THRESHOLD_MINUTES = 10;
+
+        // Obtener el ID de usuario del request para el filtro
+        $userId = $request->input('user_id');
+
+        // Empezar la consulta base para Viveros
+        $viveroQuery = Vivero::with('user', 'modulos.latestLectura');
+
+        // Si se especifica un userId, filtrar por ese usuario
+        if ($userId) {
+            $viveroQuery->where('user_id', $userId);
+        }
+
+        // Ejecutar la consulta (filtrada o no)
+        $viveros = $viveroQuery->get();
+
+        // Iterar sobre cada vivero para calcular las métricas
+        foreach ($viveros as $vivero) {
+            $modulosOcupados = 0;
+            $alertasAdvertencia = 0;
+            $alertasCritico = 0;
+            $modulosOffline = 0;
+
+            foreach ($vivero->modulos as $modulo) {
+                if ($modulo->estado === 'Ocupado') {
+                    $modulosOcupados++;
+                }
+
+                $latestReading = $modulo->latestLectura;
+
+                if ($latestReading) {
+                    $diffInMinutes = now()->diffInMinutes($latestReading->created_at);
+
+                    if ($diffInMinutes > $OFFLINE_THRESHOLD_MINUTES) {
+                        $modulosOffline++;
+                        continue; 
+                    }
+
+                    $phVal = (float)$latestReading->ph;
+                    $tempVal = (float)$latestReading->temperatura;
+
+                    if ($phVal < ($PH_MIN - 0.5) || $phVal > ($PH_MAX + 0.5)) {
+                        $alertasCritico++;
+                    } elseif ($phVal < $PH_MIN || $phVal > $PH_MAX || $tempVal > $TEMP_MAX) {
+                        $alertasAdvertencia++;
+                    }
+
+                } else {
+                    if ($modulo->estado !== 'Disponible') {
+                        $modulosOffline++;
+                    }
+                }
+            }
+
+            // Adjuntar los contadores calculados al objeto vivero
+            $vivero->modulos_total_count = $vivero->modulos->count();
+            $vivero->modulos_ocupados_count = $modulosOcupados;
+            $vivero->alertas_advertencia_count = $alertasAdvertencia;
+            $vivero->alertas_critico_count = $alertasCritico;
+            $vivero->modulos_offline_count = $modulosOffline;
+        }
+
+        // Obtener todos los usuarios que tienen viveros para el menú de filtro
+        $users = User::whereHas('viveros')->orderBy('nombres')->get();
+
+        return view('admin.reportes.viveros-report', compact('viveros', 'users'));
     }
 
-    public function downloadViverosReport()
+    public function downloadViverosReport(Request $request)
     {
-        $viveros = Vivero::with('user')->withCount('modulos')->get();
-        $data = [ 'viveros' => $viveros, 'fecha' => now()->format('d/m/Y') ];
+        // Lógica de cálculo de alertas
+        $PH_MIN = 5.8;
+        $PH_MAX = 6.4;
+        $TEMP_MAX = 25.0;
+        $OFFLINE_THRESHOLD_MINUTES = 10;
+
+        // Obtener el ID de usuario del request para el filtro
+        $userId = $request->input('user_id');
+        $filteredUser = null;
+
+        // Empezar la consulta base para Viveros
+        $viveroQuery = Vivero::with('user', 'modulos.latestLectura');
+
+        // Si se especifica un userId, filtrar y obtener el usuario
+        if ($userId) {
+            $viveroQuery->where('user_id', $userId);
+            $filteredUser = User::find($userId);
+        }
+
+        $viveros = $viveroQuery->get();
+
+        // Iterar sobre cada vivero para calcular las métricas
+        foreach ($viveros as $vivero) {
+            $modulosOcupados = 0;
+            $alertasAdvertencia = 0;
+            $alertasCritico = 0;
+            $modulosOffline = 0;
+
+            foreach ($vivero->modulos as $modulo) {
+                if ($modulo->estado === 'Ocupado') {
+                    $modulosOcupados++;
+                }
+                $latestReading = $modulo->latestLectura;
+                if ($latestReading) {
+                    $diffInMinutes = now()->diffInMinutes($latestReading->created_at);
+                    if ($diffInMinutes > $OFFLINE_THRESHOLD_MINUTES) {
+                        $modulosOffline++;
+                        continue;
+                    }
+                    $phVal = (float)$latestReading->ph;
+                    $tempVal = (float)$latestReading->temperatura;
+                    if ($phVal < ($PH_MIN - 0.5) || $phVal > ($PH_MAX + 0.5)) {
+                        $alertasCritico++;
+                    } elseif ($phVal < $PH_MIN || $phVal > $PH_MAX || $tempVal > $TEMP_MAX) {
+                        $alertasAdvertencia++;
+                    }
+                } else {
+                    if ($modulo->estado !== 'Disponible') {
+                        $modulosOffline++;
+                    }
+                }
+            }
+            $vivero->modulos_total_count = $vivero->modulos->count();
+            $vivero->modulos_ocupados_count = $modulosOcupados;
+            $vivero->alertas_advertencia_count = $alertasAdvertencia;
+            $vivero->alertas_critico_count = $alertasCritico;
+            $vivero->modulos_offline_count = $modulosOffline;
+        }
+
+        $data = [ 
+            'viveros' => $viveros, 
+            'fecha' => now()->isoFormat('D MMMM YYYY'),
+            'filteredUser' => $filteredUser
+        ];
         $pdf = Pdf::loadView('admin.reportes.viveros-report-pdf', $data);
         return $pdf->download('reporte-general-viveros.pdf');
     }
