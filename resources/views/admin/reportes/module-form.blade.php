@@ -47,13 +47,34 @@
                             </select>
                         </div>
 
-                        <div x-show="reportType === 'custom'" class="space-y-6 p-4 bg-[#fafafa] rounded-lg border border-[#e0e0e0]">
+                        <div x-show="reportType === 'custom'" class="space-y-6 p-4 bg-[#fafafa] rounded-lg border border-[#e0e0e0]" id="custom-report-form">
+                            @if(Auth::user()->role->nombre_rol === 'Admin')
                             <div>
-                                <label for="modulo_id_custom" class="block font-semibold text-sm text-[#1a1a1a] mb-2">🔧 Selecciona un Módulo</label>
-                                <select name="modulo_id_custom" id="modulo_id_custom" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
-                                    @foreach($modulos as $modulo)
-                                        <option value="{{ $modulo->id }}">{{ $modulo->vivero->nombre }} - {{ $modulo->codigo_identificador }}</option>
+                                <label for="user_id" class="block font-semibold text-sm text-[#1a1a1a] mb-2">1. Selecciona un Usuario</label>
+                                <select id="user_id" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition">
+                                    <option value="">-- Elige un usuario --</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->full_name }} ({{ $user->email }})</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            @endif
+
+                            <div>
+                                <label for="vivero_id" class="block font-semibold text-sm text-[#1a1a1a] mb-2">
+                                    {{ Auth::user()->role->nombre_rol === 'Admin' ? '2. Selecciona un Vivero' : '1. Selecciona un Vivero' }}
+                                </label>
+                                <select id="vivero_id" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition" disabled>
+                                    <option value="">-- {{ Auth::user()->role->nombre_rol === 'Admin' ? 'Primero elige un usuario' : 'Cargando...' }} --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="modulo_id_custom" class="block font-semibold text-sm text-[#1a1a1a] mb-2">
+                                     {{ Auth::user()->role->nombre_rol === 'Admin' ? '3. Selecciona un Módulo' : '2. Selecciona un Módulo' }}
+                                </label>
+                                <select name="modulo_id_custom" id="modulo_id_custom" class="block w-full px-4 py-2 bg-white border-[#e0e0e0] text-[#1a1a1a] focus:border-[#ff4b65] focus:ring-2 focus:ring-[#ffdef0] rounded-lg shadow-sm transition" disabled>
+                                    <option value="">-- Primero elige un vivero --</option>
                                 </select>
                             </div>
                             
@@ -85,8 +106,6 @@
             </div>
         </div>
     </div>
-</x-app-layout>
-
 <script>
     function setDates(days) {
         const endDate = new Date();
@@ -104,4 +123,113 @@
         document.getElementById('fecha_fin').value = today.toISOString().split('T')[0];
         document.getElementById('fecha_inicio').value = firstDay.toISOString().split('T')[0];
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const userSelect = document.getElementById('user_id');
+        const viveroSelect = document.getElementById('vivero_id');
+        const moduloSelect = document.getElementById('modulo_id_custom');
+        
+        const isAdmin = {{ Auth::user()->role->nombre_rol === 'Admin' ? 'true' : 'false' }};
+        const currentUserId = {{ Auth::id() }};
+
+        function resetViveroSelect() {
+            viveroSelect.innerHTML = `<option value="">-- ${isAdmin ? 'Primero elige un usuario' : 'Selecciona un vivero'} --</option>`;
+            viveroSelect.disabled = true;
+            resetModuloSelect();
+        }
+
+        function resetModuloSelect() {
+            moduloSelect.innerHTML = '<option value="">-- Primero elige un vivero --</option>';
+            moduloSelect.disabled = true;
+        }
+
+        function fetchViveros(userId) {
+            if (!userId) {
+                resetViveroSelect();
+                return;
+            }
+            
+            viveroSelect.innerHTML = '<option value="">Cargando viveros...</option>';
+            viveroSelect.disabled = false;
+
+            fetch(`/admin/api/users/${userId}/viveros`, { 
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } 
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Respuesta de red no fue OK');
+                    return response.json();
+                })
+                .then(data => {
+                    viveroSelect.innerHTML = '<option value="">-- Selecciona un vivero --</option>';
+                    if (data.length === 0) {
+                        viveroSelect.innerHTML = '<option value="">-- Este usuario no tiene viveros --</option>';
+                        viveroSelect.disabled = true;
+                    } else {
+                        data.forEach(vivero => {
+                            const option = new Option(vivero.nombre, vivero.id);
+                            viveroSelect.add(option);
+                        });
+                        viveroSelect.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching viveros:', error);
+                    viveroSelect.innerHTML = '<option value="">-- Error al cargar viveros --</option>';
+                });
+        }
+
+        if (isAdmin) {
+            // Inicializar Select2 para el campo de usuario
+            $(userSelect).select2({
+                placeholder: "-- Busca un usuario --",
+                allowClear: true,
+                width: 'resolve' // Ajusta el ancho al contenedor
+            });
+
+            $(userSelect).on('change', function () {
+                const userId = $(this).val();
+                fetchViveros(userId);
+                resetModuloSelect();
+            });
+        } else {
+            fetchViveros(currentUserId);
+        }
+
+        viveroSelect.addEventListener('change', () => {
+            const viveroId = viveroSelect.value;
+            if (!viveroId) {
+                resetModuloSelect();
+                return;
+            }
+
+            moduloSelect.innerHTML = '<option value="">Cargando módulos...</option>';
+            moduloSelect.disabled = false;
+
+            fetch(`/admin/api/viveros/${viveroId}/modulos`, { 
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' } 
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Respuesta de red no fue OK');
+                    return response.json();
+                })
+                .then(data => {
+                    moduloSelect.innerHTML = '<option value="">-- Selecciona un módulo --</option>';
+                    if (data.length === 0) {
+                        moduloSelect.innerHTML = '<option value="">-- Este vivero no tiene módulos --</option>';
+                        moduloSelect.disabled = true;
+                    } else {
+                        data.forEach(modulo => {
+                            const option = new Option(modulo.codigo_identificador, modulo.id);
+                            moduloSelect.add(option);
+                        });
+                        moduloSelect.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching modulos:', error);
+                    moduloSelect.innerHTML = '<option value="">-- Error al cargar módulos --</option>';
+                });
+        });
+    });
 </script>
+</x-app-layout>

@@ -29,11 +29,14 @@ class ReporteController extends Controller
         $user = Auth::user();
         $modulos = collect(); 
         $modulosOcupados = collect(); 
+        $users = collect(); // Inicializamos la colección de usuarios
 
         if ($user->role->nombre_rol === 'Admin') {
-            // El Admin ve TODOS los módulos
+            // El Admin ve TODOS los módulos y los usuarios que tienen viveros
             $modulos = Modulo::with('vivero')->orderBy('vivero_id')->orderBy('codigo_identificador')->get();
             $modulosOcupados = $modulos->where('estado', 'Ocupado');
+            // Obtenemos solo usuarios que tienen al menos un vivero para la selección
+            $users = User::whereHas('viveros')->orderBy('nombres')->get();
 
         } else { 
             // --- LÓGICA CORREGIDA PARA VARIOS VIVEROS ---
@@ -52,13 +55,9 @@ class ReporteController extends Controller
                 // Filtramos los ocupados de la colección completa
                 $modulosOcupados = $modulos->where('estado', 'Ocupado');
             }
-            // Si $viverosDelDueno está vacío, $modulos quedará vacío (correcto)
         }
 
-        // --- IMPORTANTE: Eliminamos o comentamos el dd() si aún estaba ---
-        // dd($user->role->nombre_rol, $user->viveros, $modulos); 
-
-        return view('admin.reportes.module-form', compact('modulos', 'modulosOcupados'));
+        return view('admin.reportes.module-form', compact('modulos', 'modulosOcupados', 'users'));
     }
 
     
@@ -109,7 +108,7 @@ class ReporteController extends Controller
         // Obtener datos reales (consulta agregada por hora - igual que antes)
         $lecturasAgregadas = LecturaSensor::where('modulo_id', $moduloId)
             ->whereBetween('created_at', [$fechaInicio, $fechaFin])
-            ->select(/* ... campos DB::raw ... */ DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'))
+            ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'), DB::raw('AVG(humedad) as humedad_avg'), DB::raw('MIN(humedad) as humedad_min'), DB::raw('MAX(humedad) as humedad_max'))
             ->groupBy('hora_grupo')
             ->orderBy('hora_grupo', 'asc')
             ->get();
@@ -169,7 +168,7 @@ class ReporteController extends Controller
         // Obtener datos reales (consulta agregada por hora - igual que antes)
         $lecturasAgregadas = LecturaSensor::where('modulo_id', $moduloId)
             ->whereBetween('created_at', [$fechaInicio, $fechaFin])
-             ->select(/* ... campos DB::raw ... */ DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'))
+             ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hora_grupo'), DB::raw('AVG(ph) as ph_avg'), DB::raw('MIN(ph) as ph_min'), DB::raw('MAX(ph) as ph_max'), DB::raw('AVG(ec) as ec_avg'), DB::raw('MIN(ec) as ec_min'), DB::raw('MAX(ec) as ec_max'), DB::raw('AVG(temperatura) as temperatura_avg'), DB::raw('MIN(temperatura) as temperatura_min'), DB::raw('MAX(temperatura) as temperatura_max'), DB::raw('AVG(luz) as luz_avg'), DB::raw('MIN(luz) as luz_min'), DB::raw('MAX(luz) as luz_max'), DB::raw('AVG(humedad) as humedad_avg'), DB::raw('MIN(humedad) as humedad_min'), DB::raw('MAX(humedad) as humedad_max'))
             ->groupBy('hora_grupo')
             ->orderBy('hora_grupo', 'asc')
             ->get();

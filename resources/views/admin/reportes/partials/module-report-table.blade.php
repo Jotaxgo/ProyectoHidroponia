@@ -32,7 +32,7 @@
     @endif
 
     <div class="relative {{ !$isPdf ? 'overflow-x-auto rounded-xl border border-[#e0e0e0]' : '' }}">
-        <table class="w-full text-sm text-left {{ !$isPdf ? 'text-[#555555]' : '' }}">
+        <table class="{{ $isPdf ? 'data-table' : 'w-full text-sm text-left text-[#555555]' }}">
             <thead class="{{ !$isPdf ? 'text-xs text-[#1a1a1a] uppercase bg-gradient-to-r from-[#fafafa] to-[#f5f5f5] border-b border-[#e0e0e0]' : '' }}">
                 <tr>
                     <th rowspan="2" class="px-4 py-3 {{ !$isPdf ? 'border-r border-[#e0e0e0] align-bottom font-semibold' : '' }}">Fecha y Hora</th>
@@ -70,15 +70,15 @@
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center bg-[#fafafa] border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->ec_avg, 2, ',', '.') }}</td>
                         <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->ec_max, 2, ',', '.') }}</td>
                         {{-- Temp --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->temperatura_avg, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->temperatura_avg, 1, ',', '.') }}</td>
                         {{-- Luz --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0]' : '' }}">{{ number_format($lecturaHora->luz_avg, 0, '', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center border-r border-[#e0e0e0] font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->luz_avg, 0, '', '.') }}</td>
                         {{-- Humedad --}}
-                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center' : '' }}">{{ number_format($lecturaHora->humedad_avg, 1, ',', '.') }}</td>
+                        <td class="{{ !$isPdf ? 'px-2 py-2 text-center font-semibold text-[#1a1a1a]' : '' }}">{{ number_format($lecturaHora->humedad_avg, 1, ',', '.') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-[#999999]' : '' }}">
+                        <td colspan="10" class="no-data {{ !$isPdf ? 'px-6 py-4 text-center text-[#999999]' : '' }}">
                             📭 No se encontraron lecturas registradas para este módulo en el período seleccionado.
                         </td>
                     </tr>

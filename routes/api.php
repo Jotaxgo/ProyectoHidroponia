@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 // --- RUTA DEL ESP32 (ENTRADA DE DATOS) ---
 // Esta ruta recibe los datos de los sensores.
 Route::post('/lecturas', [LecturaSensorController::class, 'store'])->middleware('auth:sanctum');

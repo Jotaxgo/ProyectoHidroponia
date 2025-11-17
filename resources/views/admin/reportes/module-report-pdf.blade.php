@@ -4,184 +4,171 @@
     <meta charset="UTF-8">
     <title>Reporte de Módulo</title>
     <style>
-        @page {
-            margin: 1cm;
-            /* Estilos para el pie de página */
-            @bottom-center {
-                content: "Página " counter(page) " de " counter(pages);
-                font-family: 'Inter', sans-serif;
-                font-size: 8pt;
-                color: #555555;
-            }
-        }
+        @page { margin: 1cm; }
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Helvetica', 'Arial', sans-serif; 
             margin: 0; 
-            color: #1a1a1a; /* text-dark */
-            font-size: 10pt;
+            color: #333;
+            font-size: 9pt;
         }
-        .container {
-            padding: 1cm;
+        .header-logo {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .header { 
-            text-align: center; 
-            margin-bottom: 1.5cm; 
-            border-bottom: 1px solid #e0e0e0; /* border */
-            padding-bottom: 10px;
+        .header-logo img {
+            height: 45px;
         }
-        .header img { 
-            height: 50px; 
-            margin-bottom: 10px; 
-        }
-        .header h1 { 
-            font-size: 20pt; 
-            color: #9c0000; /* strawberry-dark */
-            margin: 0; 
+        .report-title {
+            font-size: 18pt;
+            text-align: center;
+            margin: 0;
+            margin-bottom: 20px;
+            color: #C2185B; /* Tono de rojo más profesional */
             font-weight: bold;
         }
-        .info-section {
-            background-color: #f8f8f8; /* bg-gray-50 */
-            border: 1px solid #e0e0e0; /* border */
-            padding: 15px;
-            margin-bottom: 1.5cm;
-            border-radius: 8px;
-            display: table; /* Usar display: table para compatibilidad con dompdf */
+        .info-table {
             width: 100%;
-            table-layout: fixed;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
         }
-        .info-column {
-            display: table-cell; /* Usar display: table-cell */
+        .info-table td {
             width: 50%;
             vertical-align: top;
-            box-sizing: border-box;
-            padding: 0 1%;
+            padding: 10px;
         }
-        .info-column:first-child {
-            border-right: 1px solid #e0e0e0; /* Separador visual */
-        }
-        .info-item {
+        .info-table .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #C2185B;
             margin-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
         }
-        .info-item strong {
-            color: #555555; /* text-muted */
-            font-size: 8pt;
-            display: block;
-            margin-bottom: 2px;
-        }
-        .info-item span {
-            color: #1a1a1a; /* text-dark */
-            font-size: 10pt;
-            font-weight: bold;
-        }
-        .info-item span.highlight {
-            color: #ff4b65; /* strawberry */
-        }
-        .limits-title {
-            font-size: 10pt;
-            color: #9c0000; /* strawberry-dark */
-            margin-top: 10px;
+        .info-table .info-item {
             margin-bottom: 5px;
+            font-size: 9pt;
+        }
+        .info-table .info-item strong {
             font-weight: bold;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 3px;
+            color: #555;
         }
-        .limit-item {
-            margin-bottom: 5px;
+        .parameter-box {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
         }
-        .limit-item strong {
-            color: #555555; /* text-muted */
-            font-size: 8pt;
-            display: inline-block;
-            margin-right: 5px;
-        }
-        .limit-item span {
-            color: #1a1a1a; /* text-dark */
-            font-size: 10pt;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .table-section {
-            margin-top: 1cm;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px; 
+        .parameter-table {
+            width: 100%;
             font-size: 8pt;
         }
-        th, td { 
-            border: 1px solid #e0e0e0; /* border */
-            padding: 6px 4px; 
-            text-align: center; 
+        .parameter-table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid #eee;
         }
-        thead th { 
-            background-color: #f5f5f5; /* bg-gray-50 */
-            color: #1a1a1a; /* text-dark */
-            font-weight: bold; 
+        .parameter-table td:first-child {
+            font-weight: bold;
+            color: #555;
+        }
+        .main-data-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        /* Estilos para la tabla de datos principal (inyectados desde el parcial) */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ccc;
+            padding: 4px;
+            text-align: center;
+        }
+        .data-table thead th {
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
             text-transform: uppercase;
+            font-size: 7pt;
         }
-        tbody tr:nth-child(even) { 
-            background-color: #fafafa; /* bg-gray-50 */
+        .data-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
-        .no-data { 
-            text-align: center; 
-            color: #555555; 
-            padding: 20px; 
+        .data-table .prom-cell {
+            background-color: #e8e8e8;
+            font-weight: bold;
+        }
+        .no-data {
+            text-align: center;
+            padding: 20px;
             font-style: italic;
+        }
+        .page-number:before {
+            content: "Página " counter(page);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="{{ public_path('images/Logo Hidrofrutilla 2.png') }}" alt="Logo Hidrofrutilla">
-            <h1>Reporte de Módulo Hidropónico</h1>
-        </div>
-
-        <div class="info-section">
-            <div class="info-column">
-                <div class="info-item">
-                    <strong>Módulo:</strong> 
-                    <span class="highlight">{{ $modulo->codigo_identificador }} ({{ $modulo->vivero->nombre }})</span>
-                </div>
-                <div class="info-item">
-                    <strong>Cultivo Actual:</strong> 
-                    <span>{{ $cultivoActual ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <strong>Fecha de Siembra:</strong> 
-                    <span>{{ $fechaSiembra ? \Carbon\Carbon::parse($fechaSiembra)->isoFormat('D MMMM YYYY') : 'N/A' }}</span>
-                </div>
-            </div>
-            <div class="info-column">
-                <div class="info-item">
-                    <strong>Periodo del Reporte:</strong> 
-                    <span>{{ $fechaInicio }} al {{ $fechaFin }}</span>
-                </div>
-                <div class="info-item">
-                    <strong>Dueño:</strong> 
-                    <span>{{ $dueno->full_name }}</span>
-                </div>
-                <div class="info-item">
-                    <strong>Generado por:</strong> 
-                    <span>{{ $generadoPor }} ({{ $fechaGeneracion }})</span>
-                </div>
-                <div class="limits-title">Rangos Ideales para el Cultivo</div>
-                @foreach(['ph', 'ec', 'temperatura'] as $param)
-                    @if(isset($limits[$param]['min']) && isset($limits[$param]['max']))
-                        <div class="limit-item">
-                            <strong>{{ strtoupper($param) }}:</strong> 
-                            <span>{{ $limits[$param]['min'] }} - {{ $limits[$param]['max'] }} {{ $param === 'temperatura' ? '°C' : ($param === 'ec' ? 'mS/cm' : '') }}</span>
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-
-        <div class="table-section">
-            @include('admin.reportes.partials.module-report-table', ['isPdf' => true])
-        </div>
+    <div class="header-logo">
+        <img src="{{ public_path('images/Logo Hidrofrutilla 2.png') }}" alt="Logo">
     </div>
+
+    <h1 class="report-title">Reporte de Módulo Hidropónico</h1>
+
+    <table class="info-table">
+        <tr>
+            <td>
+                <div class="section-title">Información del Módulo</div>
+                <div class="info-item">
+                    <strong>Módulo:</strong> {{ $modulo->codigo_identificador }} ({{ $modulo->vivero->nombre }})
+                </div>
+                <div class="info-item">
+                    <strong>Cultivo:</strong> {{ $cultivoActual ?? 'N/A' }}
+                </div>
+                <div class="info-item">
+                    <strong>Siembra:</strong> {{ $fechaSiembra ? \Carbon\Carbon::parse($fechaSiembra)->isoFormat('D MMM YYYY') : 'N/A' }}
+                </div>
+                <br>
+                <div class="section-title">Información del Reporte</div>
+                <div class="info-item">
+                    <strong>Periodo:</strong> {{ $fechaInicio }} al {{ $fechaFin }}
+                </div>
+                <div class="info-item">
+                    <strong>Generado por:</strong> {{ $generadoPor }}
+                </div>
+                 <div class="info-item">
+                    <strong>Fecha:</strong> {{ $fechaGeneracion }}
+                </div>
+            </td>
+            <td>
+                <div class="parameter-box">
+                    <div class="section-title">Parámetros del Cultivo</div>
+                    <table class="parameter-table">
+                        @php
+                            $units = ['ec' => 'mS/cm', 'temperatura' => '°C', 'humedad' => '%'];
+                        @endphp
+                        @foreach(['ph', 'ec', 'temperatura', 'humedad'] as $param)
+                            @if(isset($limits[$param]['min']) && isset($limits[$param]['max']))
+                                <tr>
+                                    <td>{{ strtoupper($param) }}</td>
+                                    <td>{{ $limits[$param]['min'] }} - {{ $limits[$param]['max'] }} {{ $units[$param] ?? '' }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <h2 class="main-data-title">Registro de Datos por Hora</h2>
+
+    @include('admin.reportes.partials.module-report-table', ['isPdf' => true])
+
 </body>
 </html>

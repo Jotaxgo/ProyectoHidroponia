@@ -92,6 +92,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         // NUEVA RUTA PARA EL HISTORIAL DE GRÁFICOS
         Route::get('/dashboard/history/{modulo}', [ApiDashboardController::class, 'getModuleHistory']);
 
+        // --- RUTAS DE API PARA FORMULARIO DE REPORTES ---
+        Route::prefix('api')->group(function () {
+            Route::get('/users/{user}/viveros', [App\Http\Controllers\Api\ViveroApiController::class, 'getViverosByUser'])->name('api.users.viveros');
+            Route::get('/viveros/{vivero}/modulos', [App\Http\Controllers\Api\ModuloApiController::class, 'getModulosByVivero'])->name('api.viveros.modulos');
+        });
+
        
         
     });
