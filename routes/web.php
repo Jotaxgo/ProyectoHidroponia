@@ -125,5 +125,6 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         Route::get('reportes/viveros/descargar', [ReporteController::class, 'downloadViverosReport'])->name('reportes.viveros.download');
 
          Route::get('/vivero/{vivero}/latest-data', [App\Http\Controllers\Api\ApiOwnerDashboardController::class, 'getOwnerModuleData'])->name('owner.vivero.latestData');
+         Route::get('/modulos/{modulo}/history', [App\Http\Controllers\Api\ApiOwnerDashboardController::class, 'getModuleHistory'])->name('owner.modulos.history');
     });
 });

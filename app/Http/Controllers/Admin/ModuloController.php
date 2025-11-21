@@ -17,8 +17,9 @@ class ModuloController extends Controller
     {
         // Obtenemos solo los módulos que pertenecen a ESE vivero
         $modulos = $vivero->modulos()->get();
+        $limits = config('hydroponics.limits');
 
-        return view('admin.modulos.index', compact('vivero', 'modulos'));
+        return view('admin.modulos.index', compact('vivero', 'modulos', 'limits'));
     }
 
     /**

@@ -123,4 +123,31 @@ class ApiOwnerDashboardController extends Controller
         // 7. Devolvemos el JSON
         return response()->json($latestData);
     }
+
+    public function getModuleHistory(Request $request, Modulo $modulo)
+    {
+        // Security Check: Ensure the user owns the vivero this modulo belongs to, or is an Admin.
+        $user = $request->user();
+        if ($user->id !== $modulo->vivero->user_id && $user->role->nombre_rol !== 'Admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        // Fetch the last 24 hours of readings for this module.
+        $readings = LecturaSensor::where('modulo_id', $modulo->id)
+            ->where('created_at', '>=', Carbon::now()->subDay())
+            ->orderBy('created_at', 'asc') // Important for charting
+            ->get();
+
+        // Format the data for Chart.js
+        $formattedReadings = $readings->map(function ($reading) {
+            return [
+                'ph' => (float)$reading->ph,
+                'ec' => (float)$reading->ec,
+                'temperatura' => (float)$reading->temperatura,
+                'created_at' => Carbon::parse($reading->created_at)->format('H:i'), // Format time for labels
+            ];
+        });
+
+        return response()->json($formattedReadings);
+    }
 }
