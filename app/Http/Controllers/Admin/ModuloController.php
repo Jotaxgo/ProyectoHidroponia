@@ -133,6 +133,7 @@ class ModuloController extends Controller
     public function restore(Vivero $vivero, $moduloId)
     {
         $modulo = Modulo::withTrashed()->where('vivero_id', $vivero->id)->findOrFail($moduloId);
+        $this->authorize('restore', $modulo);
         $modulo->restore();
 
         return redirect()->route('admin.viveros.modulos.trash', $vivero)->with('success', 'Módulo restaurado exitosamente.');
@@ -144,6 +145,7 @@ class ModuloController extends Controller
     public function forceDelete(Vivero $vivero, $moduloId)
     {
         $modulo = Modulo::withTrashed()->where('vivero_id', $vivero->id)->findOrFail($moduloId);
+        $this->authorize('forceDelete', $modulo);
         $modulo->forceDelete();
 
         return redirect()->route('admin.viveros.modulos.trash', $vivero)->with('success', 'Módulo eliminado permanentemente.');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class DashboardController extends Controller
 {
@@ -67,6 +68,7 @@ class DashboardController extends Controller
 
     public function toggleBomba(Modulo $modulo)
     {
+        Gate::authorize('update', $modulo);
         $modulo->bomba_estado = !$modulo->bomba_estado;
         $modulo->save();
 
