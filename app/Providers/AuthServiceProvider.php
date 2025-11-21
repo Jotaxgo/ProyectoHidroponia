@@ -3,6 +3,8 @@
 namespace App\Providers;
 use App\Models\Modulo; 
 use App\Policies\ModuloPolicy;
+use App\Models\Vivero;
+use App\Policies\ViveroPolicy;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -15,7 +17,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Modulo::class => ModuloPolicy::class, // <-- AÑADE ESTA LÍNEA
+        Modulo::class => ModuloPolicy::class,
+        Vivero::class => ViveroPolicy::class,
     ];
 
     /**

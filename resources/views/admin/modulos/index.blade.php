@@ -18,10 +18,13 @@
                             <a href="{{ route('dashboard') }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm inline-block">← Volver a Dashboard</a>
                         @endif
                     </div>
-                    <div class="flex gap-4">
-                        <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">🗑️ Papelera</a>
-                        <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white rounded-lg text-xs font-semibold hover:shadow-lg transition">+ Nuevo Módulo</a>
-                    </div>
+                                        <div class="flex gap-4">
+                                            <a href="{{ route('admin.viveros.modulos.trash', $vivero) }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">🗑️ Papelera</a>
+                                            <a href="{{ route('admin.viveros.settings.edit', $vivero) }}" class="text-[#555555] hover:text-[#9c0000] transition font-medium text-sm">⚙️ Ajustes de Sensores</a>
+                                            <a href="{{ route('admin.viveros.modulos.create', $vivero) }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#9c0000] to-[#ff4b65] text-white rounded-lg text-xs font-semibold hover:shadow-lg transition">
+                                                + Nuevo Módulo
+                                            </a>
+                                        </div>
                 </div>
                 <h2 class="text-3xl font-bold bg-gradient-to-r from-[#9c0000] to-[#ff4b65] bg-clip-text text-transparent mb-6">Gestión de Módulos</h2>
                 <div id="gestion-table-container" class="relative overflow-x-auto rounded-xl border border-[#e0e0e0]">

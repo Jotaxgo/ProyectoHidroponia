@@ -41,12 +41,13 @@ class LecturaSensor extends Model
                 foreach ($limits as $key => $range) {
                     $value = $this->$key;
                     if ($value === null) {
-                        continue; // No se puede verificar un valor nulo
+                        continue; 
                     }
 
-                    if ($value < $range['min'] || $value > $range['max']) {
-                        // Si cualquier valor está fuera de rango, es crítico.
-                        // Se puede refinar en el futuro para incluir "ADVERTENCIA".
+                    $min = $range['min'] ?? null;
+                    $max = $range['max'] ?? null;
+
+                    if (($min !== null && $value < $min) || ($max !== null && $value > $max)) {
                         return 'CRÍTICO';
                     }
                 }

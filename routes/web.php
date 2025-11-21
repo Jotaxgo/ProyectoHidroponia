@@ -117,6 +117,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         // CRUD anidado de Módulos
         Route::resource('viveros.modulos', ModuloController::class)->except(['show']);
 
+        // Rutas para la configuración de sensores por vivero
+        Route::get('viveros/{vivero}/settings', [App\Http\Controllers\Admin\ViveroSettingsController::class, 'edit'])->name('viveros.settings.edit');
+        Route::post('viveros/{vivero}/settings', [App\Http\Controllers\Admin\ViveroSettingsController::class, 'update'])->name('viveros.settings.update');
+
         // Reportes
         Route::get('reportes/modulo', [ReporteController::class, 'showModuleReportForm'])->name('reportes.module.form');
         Route::get('reportes/modulo/vista', [ReporteController::class, 'showModuleReportPreview'])->name('reportes.module.show');
